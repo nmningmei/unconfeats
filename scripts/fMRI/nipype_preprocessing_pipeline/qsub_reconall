@@ -1,0 +1,17 @@
+
+#!/bin/bash
+
+# This is a script to send "2.freesurfer reconall.py" as a batch job.
+# it works on anatomical dataset
+
+#$ -cwd
+#$ -o reconall/out.txt
+#$ -e reconall/err.txt
+#$ -m be
+#$ -q fsl.q
+#$ -M nmei@bcbl.eu
+#$ -N "reconall"
+#$ -S /bin/bash
+
+module load rocks-python-3.6 rocks-fsl-5.0.10 rocks-freesurfer-6.0.0
+python "2.freesurfer reconall.py"

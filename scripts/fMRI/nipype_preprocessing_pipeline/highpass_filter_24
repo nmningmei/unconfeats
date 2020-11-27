@@ -1,0 +1,17 @@
+
+#!/bin/bash
+
+# This is a script to send "4.24.highpass_filter_session_3_run_6.py" as a batch job.
+# it works on dataset 24
+
+#$ -cwd
+#$ -o hpf/out_36.txt
+#$ -e hpf/err_36.txt
+#$ -m be
+#$ -q fsl.q
+#$ -M nmei@bcbl.eu
+#$ -N "hpf36"
+#$ -S /bin/bash
+
+module load rocks-python-3.6 rocks-fsl-5.0.10 rocks-freesurfer-6.0.0
+python "4.24.highpass_filter_session_3_run_6.py"

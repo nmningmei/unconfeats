@@ -1,0 +1,337 @@
+sub,roi_name,condition_source,condition_target,p
+sub-01,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,unconscious,conscious,0.992310076899231
+sub-01,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,unconscious,conscious,0.3734762652373476
+sub-01,Inferior parietal lobe,unconscious,unconscious,1.0
+sub-01,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,unconscious,unconscious,0.997510024899751
+sub-01,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,unconscious,unconscious,1.0
+sub-01,Lingual,conscious,conscious,9.99990000099999e-06
+sub-01,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-01,Lingual,unconscious,conscious,0.013239867601323986
+sub-01,Lingual,unconscious,unconscious,1.0
+sub-01,Middle fontal gyrus,conscious,conscious,1.0
+sub-01,Middle fontal gyrus,conscious,unconscious,0.05850941490585094
+sub-01,Middle fontal gyrus,unconscious,conscious,0.019369806301936982
+sub-01,Middle fontal gyrus,unconscious,unconscious,0.6861731382686174
+sub-01,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,unconscious,unconscious,0.0007899921000789992
+sub-01,Pericalcarine cortex,conscious,conscious,1.0
+sub-01,Pericalcarine cortex,conscious,unconscious,0.007069929300706993
+sub-01,Pericalcarine cortex,unconscious,conscious,9.99990000099999e-06
+sub-01,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-01,Precuneus,conscious,conscious,1.0
+sub-01,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-01,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-01,Precuneus,unconscious,unconscious,0.7390026099739002
+sub-01,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Superior frontal gyrus,conscious,unconscious,0.1990880091199088
+sub-01,Superior frontal gyrus,unconscious,conscious,0.2045779542204578
+sub-01,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,unconscious,conscious,6.999930000699993e-05
+sub-01,Superior parietal gyrus,unconscious,unconscious,1.0
+sub-02,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,unconscious,conscious,0.999590004099959
+sub-02,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,unconscious,conscious,0.999830001699983
+sub-02,Inferior temporal lobe,unconscious,unconscious,1.0
+sub-02,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-02,Lateral occipital cortex,conscious,unconscious,0.8938310616893831
+sub-02,Lateral occipital cortex,unconscious,conscious,1.0
+sub-02,Lateral occipital cortex,unconscious,unconscious,9.99990000099999e-06
+sub-02,Lingual,conscious,conscious,9.99990000099999e-06
+sub-02,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-02,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-02,Lingual,unconscious,unconscious,0.5829441705582944
+sub-02,Middle fontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,unconscious,conscious,0.991370086299137
+sub-02,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,unconscious,conscious,0.0038599614003859964
+sub-02,Parahippocampal gyrus,unconscious,unconscious,1.0
+sub-02,Pericalcarine cortex,conscious,conscious,1.0
+sub-02,Pericalcarine cortex,conscious,unconscious,0.06712932870671293
+sub-02,Pericalcarine cortex,unconscious,conscious,0.992620073799262
+sub-02,Pericalcarine cortex,unconscious,unconscious,9.99990000099999e-06
+sub-02,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-02,Precuneus,conscious,unconscious,0.0075499245007549926
+sub-02,Precuneus,unconscious,conscious,0.14627853721462786
+sub-02,Precuneus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Superior frontal gyrus,conscious,conscious,1.0
+sub-02,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Superior frontal gyrus,unconscious,conscious,0.999920000799992
+sub-02,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,unconscious,conscious,0.0022799772002279977
+sub-02,Superior parietal gyrus,unconscious,unconscious,1.0
+sub-03,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-03,Fusiform gyrus,unconscious,conscious,0.31708682913170866
+sub-03,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,conscious,unconscious,0.6756932430675693
+sub-03,Inferior frontal gyrus,unconscious,conscious,1.0
+sub-03,Inferior frontal gyrus,unconscious,unconscious,1.0
+sub-03,Inferior parietal lobe,conscious,conscious,1.0
+sub-03,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-03,Inferior parietal lobe,unconscious,conscious,0.0014399856001439985
+sub-03,Inferior parietal lobe,unconscious,unconscious,1.0
+sub-03,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-03,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-03,Inferior temporal lobe,unconscious,conscious,1.0
+sub-03,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,unconscious,conscious,0.6971030289697103
+sub-03,Lateral occipital cortex,unconscious,unconscious,0.12392876071239288
+sub-03,Lingual,conscious,conscious,9.99990000099999e-06
+sub-03,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-03,Lingual,unconscious,conscious,0.6885831141688583
+sub-03,Lingual,unconscious,unconscious,9.99990000099999e-06
+sub-03,Middle fontal gyrus,conscious,conscious,0.999990000099999
+sub-03,Middle fontal gyrus,conscious,unconscious,7.999920000799993e-05
+sub-03,Middle fontal gyrus,unconscious,conscious,1.0
+sub-03,Middle fontal gyrus,unconscious,unconscious,0.9393506064939351
+sub-03,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Parahippocampal gyrus,conscious,unconscious,0.03474965250347496
+sub-03,Parahippocampal gyrus,unconscious,conscious,0.9401905980940191
+sub-03,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Pericalcarine cortex,conscious,conscious,0.0004599954000459995
+sub-03,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-03,Pericalcarine cortex,unconscious,conscious,0.03666963330366697
+sub-03,Pericalcarine cortex,unconscious,unconscious,9.99990000099999e-06
+sub-03,Precuneus,conscious,conscious,1.0
+sub-03,Precuneus,conscious,unconscious,0.6917830821691783
+sub-03,Precuneus,unconscious,conscious,0.00021999780002199978
+sub-03,Precuneus,unconscious,unconscious,0.6772432275677244
+sub-03,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,conscious,unconscious,0.999960000399996
+sub-03,Superior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,conscious,conscious,1.0
+sub-03,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,unconscious,conscious,0.05889941100588994
+sub-03,Superior parietal gyrus,unconscious,unconscious,1.0
+sub-04,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,conscious,unconscious,4.999950000499995e-05
+sub-04,Inferior frontal gyrus,unconscious,conscious,0.996650033499665
+sub-04,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,unconscious,unconscious,1.0
+sub-04,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,unconscious,unconscious,0.6109638903610964
+sub-04,Lingual,conscious,conscious,9.99990000099999e-06
+sub-04,Lingual,conscious,unconscious,0.969440305596944
+sub-04,Lingual,unconscious,conscious,0.0983790162098379
+sub-04,Lingual,unconscious,unconscious,1.0
+sub-04,Middle fontal gyrus,conscious,conscious,1.0
+sub-04,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-04,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,conscious,unconscious,1.0
+sub-04,Parahippocampal gyrus,unconscious,conscious,0.0061299387006129935
+sub-04,Parahippocampal gyrus,unconscious,unconscious,1.0
+sub-04,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-04,Pericalcarine cortex,conscious,unconscious,0.8141018589814102
+sub-04,Pericalcarine cortex,unconscious,conscious,0.9197808021919781
+sub-04,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-04,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-04,Precuneus,conscious,unconscious,0.5715042849571504
+sub-04,Precuneus,unconscious,conscious,1.0
+sub-04,Precuneus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Superior frontal gyrus,conscious,conscious,1.0
+sub-04,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Superior frontal gyrus,unconscious,conscious,0.7894521054789452
+sub-04,Superior frontal gyrus,unconscious,unconscious,0.8237917620823791
+sub-04,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Superior parietal gyrus,unconscious,conscious,0.6171938280617194
+sub-04,Superior parietal gyrus,unconscious,unconscious,1.0
+sub-05,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,unconscious,conscious,0.0025999740002599974
+sub-05,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-05,Inferior frontal gyrus,conscious,conscious,1.0
+sub-05,Inferior frontal gyrus,conscious,unconscious,1.999980000199998e-05
+sub-05,Inferior frontal gyrus,unconscious,conscious,0.013139868601313987
+sub-05,Inferior frontal gyrus,unconscious,unconscious,0.006829931700682993
+sub-05,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,unconscious,conscious,0.999870001299987
+sub-05,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,conscious,unconscious,0.22902770972290276
+sub-05,Inferior temporal lobe,unconscious,conscious,0.0011399886001139988
+sub-05,Inferior temporal lobe,unconscious,unconscious,1.0
+sub-05,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,unconscious,unconscious,9.99990000099999e-06
+sub-05,Lingual,conscious,conscious,9.99990000099999e-06
+sub-05,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-05,Lingual,unconscious,conscious,0.00037999620003799963
+sub-05,Lingual,unconscious,unconscious,1.0
+sub-05,Middle fontal gyrus,conscious,conscious,0.6314336856631434
+sub-05,Middle fontal gyrus,conscious,unconscious,0.021149788502114977
+sub-05,Middle fontal gyrus,unconscious,conscious,0.01946980530194698
+sub-05,Middle fontal gyrus,unconscious,unconscious,1.0
+sub-05,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,unconscious,conscious,0.014749852501474986
+sub-05,Parahippocampal gyrus,unconscious,unconscious,0.997860021399786
+sub-05,Pericalcarine cortex,conscious,conscious,1.0
+sub-05,Pericalcarine cortex,conscious,unconscious,0.999990000099999
+sub-05,Pericalcarine cortex,unconscious,conscious,0.8381616183838162
+sub-05,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-05,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-05,Precuneus,conscious,unconscious,7.999920000799993e-05
+sub-05,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-05,Precuneus,unconscious,unconscious,0.002369976300236998
+sub-05,Superior frontal gyrus,conscious,conscious,0.0023799762002379974
+sub-05,Superior frontal gyrus,conscious,unconscious,0.999990000099999
+sub-05,Superior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-05,Superior frontal gyrus,unconscious,unconscious,1.0
+sub-05,Superior parietal gyrus,conscious,conscious,1.0
+sub-05,Superior parietal gyrus,conscious,unconscious,3.999960000399996e-05
+sub-05,Superior parietal gyrus,unconscious,conscious,0.5507344926550735
+sub-05,Superior parietal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,unconscious,unconscious,0.999990000099999
+sub-06,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,unconscious,unconscious,1.0
+sub-06,Lingual,conscious,conscious,9.99990000099999e-06
+sub-06,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-06,Lingual,unconscious,conscious,0.016979830201697983
+sub-06,Lingual,unconscious,unconscious,0.2060379396206038
+sub-06,Middle fontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Middle fontal gyrus,unconscious,conscious,0.03061969380306197
+sub-06,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,unconscious,conscious,0.05435945640543594
+sub-06,Parahippocampal gyrus,unconscious,unconscious,1.0
+sub-06,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,unconscious,conscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,unconscious,unconscious,9.99990000099999e-06
+sub-06,Precuneus,conscious,conscious,0.00935990640093599
+sub-06,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-06,Precuneus,unconscious,conscious,0.5285647143528565
+sub-06,Precuneus,unconscious,unconscious,0.013729862701372986
+sub-06,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,unconscious,conscious,0.00024999750002499977
+sub-06,Superior frontal gyrus,unconscious,unconscious,1.0
+sub-06,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,unconscious,conscious,0.0941390586094139
+sub-06,Superior parietal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,unconscious,unconscious,1.0
+sub-07,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,unconscious,unconscious,0.5820641793582064
+sub-07,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior temporal lobe,conscious,unconscious,0.00024999750002499977
+sub-07,Inferior temporal lobe,unconscious,conscious,0.03728962710372896
+sub-07,Inferior temporal lobe,unconscious,unconscious,0.987640123598764
+sub-07,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,unconscious,conscious,0.8749412505874942
+sub-07,Lateral occipital cortex,unconscious,unconscious,1.0
+sub-07,Lingual,conscious,conscious,9.99990000099999e-06
+sub-07,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-07,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-07,Lingual,unconscious,unconscious,9.99990000099999e-06
+sub-07,Middle fontal gyrus,conscious,conscious,1.0
+sub-07,Middle fontal gyrus,conscious,unconscious,0.8095019049809502
+sub-07,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Middle fontal gyrus,unconscious,unconscious,1.0
+sub-07,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Pericalcarine cortex,conscious,conscious,0.4377356226437736
+sub-07,Pericalcarine cortex,conscious,unconscious,1.999980000199998e-05
+sub-07,Pericalcarine cortex,unconscious,conscious,0.0023599764002359977
+sub-07,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-07,Precuneus,conscious,conscious,0.005679943200567994
+sub-07,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-07,Precuneus,unconscious,conscious,0.999990000099999
+sub-07,Precuneus,unconscious,unconscious,1.0
+sub-07,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Superior frontal gyrus,conscious,unconscious,3.999960000399996e-05
+sub-07,Superior frontal gyrus,unconscious,conscious,0.061909380906190935
+sub-07,Superior frontal gyrus,unconscious,unconscious,1.0
+sub-07,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,unconscious,unconscious,9.99990000099999e-06

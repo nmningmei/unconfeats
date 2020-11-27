@@ -1,0 +1,4 @@
+,group1,group2,meandiff,p-adj,lower,upper,reject
+0,conscious,glimpse,-0.0664,0.001,-0.081,-0.0519,True
+1,conscious,unconscious,-0.1028,0.001,-0.1173,-0.0882,True
+2,glimpse,unconscious,-0.0363,0.001,-0.0509,-0.0217,True

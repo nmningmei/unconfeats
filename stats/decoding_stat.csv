@@ -1,0 +1,757 @@
+sub,roi_name,condition_source,condition_target,p
+sub-01,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-01,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-01,Fusiform gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-01,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,glimpse,unconscious,0.999970000299997
+sub-01,Inferior frontal gyrus,unconscious,conscious,0.0024899751002489976
+sub-01,Inferior frontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-01,Inferior frontal gyrus,unconscious,unconscious,0.0019299807001929982
+sub-01,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-01,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-01,Inferior parietal lobe,glimpse,unconscious,0.999980000199998
+sub-01,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-01,Inferior parietal lobe,unconscious,glimpse,1.0
+sub-01,Inferior parietal lobe,unconscious,unconscious,0.936230637693623
+sub-01,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-01,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-01,Inferior temporal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-01,Inferior temporal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-01,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-01,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-01,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-01,Lateral occipital cortex,unconscious,glimpse,9.99990000099999e-06
+sub-01,Lateral occipital cortex,unconscious,unconscious,9.99990000099999e-06
+sub-01,Lingual,conscious,conscious,9.99990000099999e-06
+sub-01,Lingual,conscious,glimpse,9.99990000099999e-06
+sub-01,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-01,Lingual,glimpse,conscious,9.99990000099999e-06
+sub-01,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-01,Lingual,glimpse,unconscious,0.4882251177488225
+sub-01,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-01,Lingual,unconscious,glimpse,0.9326806731932681
+sub-01,Lingual,unconscious,unconscious,0.0013499865001349986
+sub-01,Middle fontal gyrus,conscious,conscious,0.00024999750002499977
+sub-01,Middle fontal gyrus,conscious,glimpse,0.03689963100368996
+sub-01,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Middle fontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Middle fontal gyrus,glimpse,unconscious,1.0
+sub-01,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-01,Middle fontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-01,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-01,Parahippocampal gyrus,unconscious,unconscious,0.964620353796462
+sub-01,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-01,Pericalcarine cortex,conscious,glimpse,9.99990000099999e-06
+sub-01,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-01,Pericalcarine cortex,glimpse,conscious,9.99990000099999e-06
+sub-01,Pericalcarine cortex,glimpse,glimpse,2.999970000299997e-05
+sub-01,Pericalcarine cortex,glimpse,unconscious,0.999910000899991
+sub-01,Pericalcarine cortex,unconscious,conscious,9.99990000099999e-06
+sub-01,Pericalcarine cortex,unconscious,glimpse,0.8482615173848261
+sub-01,Pericalcarine cortex,unconscious,unconscious,8.99991000089999e-05
+sub-01,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-01,Precuneus,conscious,glimpse,9.99990000099999e-06
+sub-01,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-01,Precuneus,glimpse,conscious,9.99990000099999e-06
+sub-01,Precuneus,glimpse,glimpse,0.999980000199998
+sub-01,Precuneus,glimpse,unconscious,0.99920000799992
+sub-01,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-01,Precuneus,unconscious,glimpse,9.99990000099999e-06
+sub-01,Precuneus,unconscious,unconscious,0.990360096399036
+sub-01,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Superior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-01,Superior frontal gyrus,conscious,unconscious,0.010759892401075988
+sub-01,Superior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Superior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Superior frontal gyrus,glimpse,unconscious,1.0
+sub-01,Superior frontal gyrus,unconscious,conscious,0.7304426955730443
+sub-01,Superior frontal gyrus,unconscious,glimpse,0.9613403865961341
+sub-01,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-01,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-01,Superior parietal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-01,Superior parietal gyrus,glimpse,unconscious,0.37307626923730763
+sub-01,Superior parietal gyrus,unconscious,conscious,1.0
+sub-01,Superior parietal gyrus,unconscious,glimpse,0.006499935000649993
+sub-01,Superior parietal gyrus,unconscious,unconscious,1.0
+sub-02,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-02,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-02,Fusiform gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-02,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-02,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-02,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-02,Inferior parietal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-02,Inferior parietal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-02,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-02,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-02,Inferior temporal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-02,Inferior temporal lobe,unconscious,glimpse,0.12079879201207988
+sub-02,Inferior temporal lobe,unconscious,unconscious,0.999990000099999
+sub-02,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-02,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-02,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-02,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-02,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-02,Lateral occipital cortex,glimpse,unconscious,0.6407835921640783
+sub-02,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-02,Lateral occipital cortex,unconscious,glimpse,0.0967790322096779
+sub-02,Lateral occipital cortex,unconscious,unconscious,4.999950000499995e-05
+sub-02,Lingual,conscious,conscious,9.99990000099999e-06
+sub-02,Lingual,conscious,glimpse,9.99990000099999e-06
+sub-02,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-02,Lingual,glimpse,conscious,7.999920000799993e-05
+sub-02,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-02,Lingual,glimpse,unconscious,9.99990000099999e-06
+sub-02,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-02,Lingual,unconscious,glimpse,9.99990000099999e-06
+sub-02,Lingual,unconscious,unconscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-02,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,glimpse,glimpse,1.0
+sub-02,Middle fontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Middle fontal gyrus,unconscious,conscious,0.5072649273507265
+sub-02,Middle fontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-02,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-02,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Pericalcarine cortex,conscious,conscious,0.6981130188698113
+sub-02,Pericalcarine cortex,conscious,glimpse,0.00010999890001099989
+sub-02,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-02,Pericalcarine cortex,glimpse,conscious,9.99990000099999e-06
+sub-02,Pericalcarine cortex,glimpse,glimpse,9.99990000099999e-06
+sub-02,Pericalcarine cortex,glimpse,unconscious,0.17518824811751882
+sub-02,Pericalcarine cortex,unconscious,conscious,0.01774982250177498
+sub-02,Pericalcarine cortex,unconscious,glimpse,0.0005599944000559995
+sub-02,Pericalcarine cortex,unconscious,unconscious,9.99990000099999e-06
+sub-02,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-02,Precuneus,conscious,glimpse,9.99990000099999e-06
+sub-02,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-02,Precuneus,glimpse,conscious,0.9708802911970881
+sub-02,Precuneus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Precuneus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-02,Precuneus,unconscious,glimpse,0.6858331416685833
+sub-02,Precuneus,unconscious,unconscious,0.0041599584004159956
+sub-02,Superior frontal gyrus,conscious,conscious,3.999960000399996e-05
+sub-02,Superior frontal gyrus,conscious,glimpse,0.004929950700492995
+sub-02,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Superior frontal gyrus,glimpse,conscious,0.00016999830001699983
+sub-02,Superior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Superior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-02,Superior frontal gyrus,unconscious,conscious,0.00023999760002399976
+sub-02,Superior frontal gyrus,unconscious,glimpse,2.999970000299997e-05
+sub-02,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-02,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-02,Superior parietal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-02,Superior parietal gyrus,glimpse,unconscious,0.14742852571474285
+sub-02,Superior parietal gyrus,unconscious,conscious,0.03872961270387296
+sub-02,Superior parietal gyrus,unconscious,glimpse,1.0
+sub-02,Superior parietal gyrus,unconscious,unconscious,0.0003899961000389996
+sub-03,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-03,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-03,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-03,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-03,Fusiform gyrus,glimpse,unconscious,0.8150918490815092
+sub-03,Fusiform gyrus,unconscious,conscious,5.999940000599994e-05
+sub-03,Fusiform gyrus,unconscious,glimpse,0.8541414585854141
+sub-03,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,conscious,unconscious,0.999580004199958
+sub-03,Inferior frontal gyrus,glimpse,conscious,0.0027099729002709972
+sub-03,Inferior frontal gyrus,glimpse,glimpse,0.9576004239957601
+sub-03,Inferior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,unconscious,conscious,1.0
+sub-03,Inferior frontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-03,Inferior frontal gyrus,unconscious,unconscious,1.999980000199998e-05
+sub-03,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-03,Inferior parietal lobe,conscious,glimpse,0.11310886891131089
+sub-03,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-03,Inferior parietal lobe,glimpse,conscious,0.99330006699933
+sub-03,Inferior parietal lobe,glimpse,glimpse,0.996750032499675
+sub-03,Inferior parietal lobe,glimpse,unconscious,0.000989990100098999
+sub-03,Inferior parietal lobe,unconscious,conscious,0.982260177398226
+sub-03,Inferior parietal lobe,unconscious,glimpse,0.14833851661483385
+sub-03,Inferior parietal lobe,unconscious,unconscious,0.0023599764002359977
+sub-03,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-03,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-03,Inferior temporal lobe,conscious,unconscious,0.00010999890001099989
+sub-03,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-03,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-03,Inferior temporal lobe,glimpse,unconscious,0.999990000099999
+sub-03,Inferior temporal lobe,unconscious,conscious,0.007269927300726993
+sub-03,Inferior temporal lobe,unconscious,glimpse,1.0
+sub-03,Inferior temporal lobe,unconscious,unconscious,0.000939990600093999
+sub-03,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-03,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-03,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-03,Lateral occipital cortex,unconscious,glimpse,0.979940200597994
+sub-03,Lateral occipital cortex,unconscious,unconscious,0.9553404465955341
+sub-03,Lingual,conscious,conscious,9.99990000099999e-06
+sub-03,Lingual,conscious,glimpse,0.8531214687853121
+sub-03,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-03,Lingual,glimpse,conscious,0.7408325916740832
+sub-03,Lingual,glimpse,glimpse,0.999980000199998
+sub-03,Lingual,glimpse,unconscious,9.99990000099999e-06
+sub-03,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-03,Lingual,unconscious,glimpse,9.99990000099999e-06
+sub-03,Lingual,unconscious,unconscious,9.99990000099999e-06
+sub-03,Middle fontal gyrus,conscious,conscious,0.00027999720002799973
+sub-03,Middle fontal gyrus,conscious,glimpse,0.986710132898671
+sub-03,Middle fontal gyrus,conscious,unconscious,0.8636613633863661
+sub-03,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-03,Middle fontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-03,Middle fontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-03,Middle fontal gyrus,unconscious,conscious,1.0
+sub-03,Middle fontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-03,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Parahippocampal gyrus,conscious,glimpse,0.00021999780002199978
+sub-03,Parahippocampal gyrus,conscious,unconscious,0.9644303556964431
+sub-03,Parahippocampal gyrus,glimpse,conscious,0.999860001399986
+sub-03,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-03,Parahippocampal gyrus,glimpse,unconscious,0.6400135998640014
+sub-03,Parahippocampal gyrus,unconscious,conscious,1.0
+sub-03,Parahippocampal gyrus,unconscious,glimpse,0.021629783702162977
+sub-03,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-03,Pericalcarine cortex,conscious,glimpse,1.0
+sub-03,Pericalcarine cortex,conscious,unconscious,0.907060929390706
+sub-03,Pericalcarine cortex,glimpse,conscious,0.17377826221737783
+sub-03,Pericalcarine cortex,glimpse,glimpse,1.0
+sub-03,Pericalcarine cortex,glimpse,unconscious,9.99990000099999e-06
+sub-03,Pericalcarine cortex,unconscious,conscious,6.999930000699993e-05
+sub-03,Pericalcarine cortex,unconscious,glimpse,1.999980000199998e-05
+sub-03,Pericalcarine cortex,unconscious,unconscious,0.0008099919000809992
+sub-03,Precuneus,conscious,conscious,0.9090409095909041
+sub-03,Precuneus,conscious,glimpse,1.0
+sub-03,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-03,Precuneus,glimpse,conscious,0.9709002909970901
+sub-03,Precuneus,glimpse,glimpse,1.0
+sub-03,Precuneus,glimpse,unconscious,9.99990000099999e-06
+sub-03,Precuneus,unconscious,conscious,0.13336866631333685
+sub-03,Precuneus,unconscious,glimpse,0.004109958900410996
+sub-03,Precuneus,unconscious,unconscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,conscious,glimpse,0.0003599964000359996
+sub-03,Superior frontal gyrus,conscious,unconscious,0.5601943980560194
+sub-03,Superior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,glimpse,glimpse,1.0
+sub-03,Superior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-03,Superior frontal gyrus,unconscious,glimpse,0.00021999780002199978
+sub-03,Superior frontal gyrus,unconscious,unconscious,0.0012799872001279988
+sub-03,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,conscious,glimpse,1.0
+sub-03,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,glimpse,conscious,0.4383256167438326
+sub-03,Superior parietal gyrus,glimpse,glimpse,1.0
+sub-03,Superior parietal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-03,Superior parietal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-03,Superior parietal gyrus,unconscious,unconscious,0.10788892111078889
+sub-04,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-04,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-04,Fusiform gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-04,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,glimpse,glimpse,0.8377516224837752
+sub-04,Inferior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,unconscious,conscious,0.8737812621873782
+sub-04,Inferior frontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-04,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-04,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-04,Inferior parietal lobe,glimpse,unconscious,0.08763912360876391
+sub-04,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-04,Inferior parietal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-04,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-04,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-04,Inferior temporal lobe,glimpse,unconscious,0.20920790792092078
+sub-04,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-04,Inferior temporal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-04,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-04,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-04,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-04,Lateral occipital cortex,unconscious,glimpse,9.99990000099999e-06
+sub-04,Lateral occipital cortex,unconscious,unconscious,9.99990000099999e-06
+sub-04,Lingual,conscious,conscious,9.99990000099999e-06
+sub-04,Lingual,conscious,glimpse,9.99990000099999e-06
+sub-04,Lingual,conscious,unconscious,0.036439635603643966
+sub-04,Lingual,glimpse,conscious,9.99990000099999e-06
+sub-04,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-04,Lingual,glimpse,unconscious,1.0
+sub-04,Lingual,unconscious,conscious,0.005479945200547995
+sub-04,Lingual,unconscious,glimpse,0.0013099869001309988
+sub-04,Lingual,unconscious,unconscious,1.0
+sub-04,Middle fontal gyrus,conscious,conscious,1.0
+sub-04,Middle fontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Middle fontal gyrus,glimpse,glimpse,0.013639863601363987
+sub-04,Middle fontal gyrus,glimpse,unconscious,0.8550014499855001
+sub-04,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-04,Middle fontal gyrus,unconscious,glimpse,0.000979990200097999
+sub-04,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,conscious,unconscious,0.6735032649673504
+sub-04,Parahippocampal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-04,Parahippocampal gyrus,glimpse,unconscious,0.6336236637633623
+sub-04,Parahippocampal gyrus,unconscious,conscious,1.999980000199998e-05
+sub-04,Parahippocampal gyrus,unconscious,glimpse,0.998370016299837
+sub-04,Parahippocampal gyrus,unconscious,unconscious,0.03496965030349696
+sub-04,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-04,Pericalcarine cortex,conscious,glimpse,0.2900670993290067
+sub-04,Pericalcarine cortex,conscious,unconscious,0.0003099969000309997
+sub-04,Pericalcarine cortex,glimpse,conscious,9.99990000099999e-06
+sub-04,Pericalcarine cortex,glimpse,glimpse,0.024729752702472976
+sub-04,Pericalcarine cortex,glimpse,unconscious,1.0
+sub-04,Pericalcarine cortex,unconscious,conscious,0.999980000199998
+sub-04,Pericalcarine cortex,unconscious,glimpse,0.999990000099999
+sub-04,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-04,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-04,Precuneus,conscious,glimpse,9.99990000099999e-06
+sub-04,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-04,Precuneus,glimpse,conscious,9.99990000099999e-06
+sub-04,Precuneus,glimpse,glimpse,9.99990000099999e-06
+sub-04,Precuneus,glimpse,unconscious,1.0
+sub-04,Precuneus,unconscious,conscious,0.999850001499985
+sub-04,Precuneus,unconscious,glimpse,1.0
+sub-04,Precuneus,unconscious,unconscious,9.99990000099999e-06
+sub-04,Superior frontal gyrus,conscious,conscious,1.0
+sub-04,Superior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Superior frontal gyrus,conscious,unconscious,0.00024999750002499977
+sub-04,Superior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Superior frontal gyrus,glimpse,glimpse,1.0
+sub-04,Superior frontal gyrus,glimpse,unconscious,1.999980000199998e-05
+sub-04,Superior frontal gyrus,unconscious,conscious,0.07282927170728293
+sub-04,Superior frontal gyrus,unconscious,glimpse,0.9743802561974381
+sub-04,Superior frontal gyrus,unconscious,unconscious,0.3985460145398546
+sub-04,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-04,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-04,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-04,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-04,Superior parietal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-04,Superior parietal gyrus,glimpse,unconscious,0.99920000799992
+sub-04,Superior parietal gyrus,unconscious,conscious,1.0
+sub-04,Superior parietal gyrus,unconscious,glimpse,1.0
+sub-04,Superior parietal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-05,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-05,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-05,Fusiform gyrus,unconscious,conscious,0.01097989020109799
+sub-05,Fusiform gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-05,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-05,Inferior frontal gyrus,conscious,conscious,1.999980000199998e-05
+sub-05,Inferior frontal gyrus,conscious,glimpse,0.999990000099999
+sub-05,Inferior frontal gyrus,conscious,unconscious,0.9325006749932501
+sub-05,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Inferior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-05,Inferior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-05,Inferior frontal gyrus,unconscious,conscious,0.2608073919260807
+sub-05,Inferior frontal gyrus,unconscious,glimpse,0.0073999260007399925
+sub-05,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-05,Inferior parietal lobe,conscious,unconscious,0.09464905350946491
+sub-05,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-05,Inferior parietal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-05,Inferior parietal lobe,unconscious,conscious,1.0
+sub-05,Inferior parietal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-05,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-05,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-05,Inferior temporal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-05,Inferior temporal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-05,Inferior temporal lobe,unconscious,unconscious,0.975320246797532
+sub-05,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-05,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-05,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-05,Lateral occipital cortex,unconscious,glimpse,9.99990000099999e-06
+sub-05,Lateral occipital cortex,unconscious,unconscious,9.99990000099999e-06
+sub-05,Lingual,conscious,conscious,9.99990000099999e-06
+sub-05,Lingual,conscious,glimpse,9.99990000099999e-06
+sub-05,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-05,Lingual,glimpse,conscious,9.99990000099999e-06
+sub-05,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-05,Lingual,glimpse,unconscious,9.99990000099999e-06
+sub-05,Lingual,unconscious,conscious,0.25239747602523976
+sub-05,Lingual,unconscious,glimpse,0.15627843721562784
+sub-05,Lingual,unconscious,unconscious,0.00022999770002299976
+sub-05,Middle fontal gyrus,conscious,conscious,1.0
+sub-05,Middle fontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-05,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Middle fontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-05,Middle fontal gyrus,glimpse,unconscious,0.026789732102678973
+sub-05,Middle fontal gyrus,unconscious,conscious,4.999950000499995e-05
+sub-05,Middle fontal gyrus,unconscious,glimpse,0.03646963530364696
+sub-05,Middle fontal gyrus,unconscious,unconscious,0.9405705942940571
+sub-05,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,unconscious,conscious,0.3846761532384676
+sub-05,Parahippocampal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-05,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-05,Pericalcarine cortex,conscious,conscious,1.0
+sub-05,Pericalcarine cortex,conscious,glimpse,0.9502304976950231
+sub-05,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-05,Pericalcarine cortex,glimpse,conscious,1.0
+sub-05,Pericalcarine cortex,glimpse,glimpse,0.11987880121198788
+sub-05,Pericalcarine cortex,glimpse,unconscious,9.99990000099999e-06
+sub-05,Pericalcarine cortex,unconscious,conscious,0.7078929210707893
+sub-05,Pericalcarine cortex,unconscious,glimpse,0.013779862201377986
+sub-05,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-05,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-05,Precuneus,conscious,glimpse,9.99990000099999e-06
+sub-05,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-05,Precuneus,glimpse,conscious,9.99990000099999e-06
+sub-05,Precuneus,glimpse,glimpse,0.07973920260797392
+sub-05,Precuneus,glimpse,unconscious,9.99990000099999e-06
+sub-05,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-05,Precuneus,unconscious,glimpse,0.06766932330676693
+sub-05,Precuneus,unconscious,unconscious,1.0
+sub-05,Superior frontal gyrus,conscious,conscious,0.017919820801791983
+sub-05,Superior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-05,Superior frontal gyrus,conscious,unconscious,1.0
+sub-05,Superior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Superior frontal gyrus,glimpse,glimpse,0.12123878761212388
+sub-05,Superior frontal gyrus,glimpse,unconscious,0.996120038799612
+sub-05,Superior frontal gyrus,unconscious,conscious,1.0
+sub-05,Superior frontal gyrus,unconscious,glimpse,0.6871131288687113
+sub-05,Superior frontal gyrus,unconscious,unconscious,0.7574224257757423
+sub-05,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-05,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-05,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-05,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-05,Superior parietal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-05,Superior parietal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-05,Superior parietal gyrus,unconscious,conscious,0.21487785122148778
+sub-05,Superior parietal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-05,Superior parietal gyrus,unconscious,unconscious,0.21185788142118578
+sub-06,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-06,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Fusiform gyrus,unconscious,glimpse,0.3964060359396406
+sub-06,Fusiform gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,glimpse,glimpse,0.06179938200617994
+sub-06,Inferior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior frontal gyrus,unconscious,glimpse,0.9058409415905841
+sub-06,Inferior frontal gyrus,unconscious,unconscious,0.16422835771642283
+sub-06,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-06,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,glimpse,glimpse,3.999960000399996e-05
+sub-06,Inferior parietal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior parietal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-06,Inferior parietal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-06,Inferior temporal lobe,conscious,unconscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-06,Inferior temporal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-06,Inferior temporal lobe,unconscious,glimpse,0.1822881771182288
+sub-06,Inferior temporal lobe,unconscious,unconscious,7.999920000799993e-05
+sub-06,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-06,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-06,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-06,Lateral occipital cortex,unconscious,glimpse,9.99990000099999e-06
+sub-06,Lateral occipital cortex,unconscious,unconscious,1.0
+sub-06,Lingual,conscious,conscious,9.99990000099999e-06
+sub-06,Lingual,conscious,glimpse,0.012509874901250988
+sub-06,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-06,Lingual,glimpse,conscious,9.99990000099999e-06
+sub-06,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-06,Lingual,glimpse,unconscious,9.99990000099999e-06
+sub-06,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-06,Lingual,unconscious,glimpse,0.025529744702552974
+sub-06,Lingual,unconscious,unconscious,0.15238847611523884
+sub-06,Middle fontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Middle fontal gyrus,conscious,glimpse,1.0
+sub-06,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Middle fontal gyrus,glimpse,conscious,1.0
+sub-06,Middle fontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Middle fontal gyrus,glimpse,unconscious,0.025769742302576976
+sub-06,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Middle fontal gyrus,unconscious,glimpse,1.0
+sub-06,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,glimpse,conscious,0.00013999860001399987
+sub-06,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Parahippocampal gyrus,unconscious,glimpse,0.999950000499995
+sub-06,Parahippocampal gyrus,unconscious,unconscious,0.0036999630003699963
+sub-06,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,conscious,glimpse,0.4098859011409886
+sub-06,Pericalcarine cortex,conscious,unconscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,glimpse,conscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,glimpse,glimpse,9.99990000099999e-06
+sub-06,Pericalcarine cortex,glimpse,unconscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,unconscious,conscious,9.99990000099999e-06
+sub-06,Pericalcarine cortex,unconscious,glimpse,1.999980000199998e-05
+sub-06,Pericalcarine cortex,unconscious,unconscious,1.0
+sub-06,Precuneus,conscious,conscious,9.99990000099999e-06
+sub-06,Precuneus,conscious,glimpse,9.99990000099999e-06
+sub-06,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-06,Precuneus,glimpse,conscious,9.99990000099999e-06
+sub-06,Precuneus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Precuneus,glimpse,unconscious,1.0
+sub-06,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-06,Precuneus,unconscious,glimpse,0.0940890591094089
+sub-06,Precuneus,unconscious,unconscious,0.0033199668003319966
+sub-06,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,conscious,glimpse,0.07527924720752792
+sub-06,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,glimpse,conscious,2.999970000299997e-05
+sub-06,Superior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Superior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Superior frontal gyrus,unconscious,glimpse,0.00012999870001299986
+sub-06,Superior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-06,Superior parietal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-06,Superior parietal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-06,Superior parietal gyrus,unconscious,glimpse,0.44982550174498254
+sub-06,Superior parietal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,conscious,glimpse,9.99990000099999e-06
+sub-07,Fusiform gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,glimpse,conscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-07,Fusiform gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Fusiform gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Fusiform gyrus,unconscious,unconscious,0.8340816591834082
+sub-07,Inferior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,conscious,glimpse,0.01904980950190498
+sub-07,Inferior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,glimpse,unconscious,1.0
+sub-07,Inferior frontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Inferior frontal gyrus,unconscious,glimpse,0.00016999830001699983
+sub-07,Inferior frontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,conscious,glimpse,9.99990000099999e-06
+sub-07,Inferior parietal lobe,conscious,unconscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,glimpse,conscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-07,Inferior parietal lobe,glimpse,unconscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,unconscious,conscious,9.99990000099999e-06
+sub-07,Inferior parietal lobe,unconscious,glimpse,9.99990000099999e-06
+sub-07,Inferior parietal lobe,unconscious,unconscious,0.024599754002459975
+sub-07,Inferior temporal lobe,conscious,conscious,9.99990000099999e-06
+sub-07,Inferior temporal lobe,conscious,glimpse,9.99990000099999e-06
+sub-07,Inferior temporal lobe,conscious,unconscious,0.0007299927000729993
+sub-07,Inferior temporal lobe,glimpse,conscious,9.99990000099999e-06
+sub-07,Inferior temporal lobe,glimpse,glimpse,9.99990000099999e-06
+sub-07,Inferior temporal lobe,glimpse,unconscious,1.999980000199998e-05
+sub-07,Inferior temporal lobe,unconscious,conscious,9.99990000099999e-06
+sub-07,Inferior temporal lobe,unconscious,glimpse,0.0997890021099789
+sub-07,Inferior temporal lobe,unconscious,unconscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,conscious,conscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,conscious,glimpse,9.99990000099999e-06
+sub-07,Lateral occipital cortex,conscious,unconscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,glimpse,conscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,glimpse,glimpse,9.99990000099999e-06
+sub-07,Lateral occipital cortex,glimpse,unconscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,unconscious,conscious,9.99990000099999e-06
+sub-07,Lateral occipital cortex,unconscious,glimpse,9.99990000099999e-06
+sub-07,Lateral occipital cortex,unconscious,unconscious,0.9588804111958881
+sub-07,Lingual,conscious,conscious,9.99990000099999e-06
+sub-07,Lingual,conscious,glimpse,9.99990000099999e-06
+sub-07,Lingual,conscious,unconscious,9.99990000099999e-06
+sub-07,Lingual,glimpse,conscious,9.99990000099999e-06
+sub-07,Lingual,glimpse,glimpse,9.99990000099999e-06
+sub-07,Lingual,glimpse,unconscious,0.0006299937000629993
+sub-07,Lingual,unconscious,conscious,9.99990000099999e-06
+sub-07,Lingual,unconscious,glimpse,9.99990000099999e-06
+sub-07,Lingual,unconscious,unconscious,0.16056839431605685
+sub-07,Middle fontal gyrus,conscious,conscious,1.0
+sub-07,Middle fontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-07,Middle fontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Middle fontal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-07,Middle fontal gyrus,glimpse,glimpse,0.999650003499965
+sub-07,Middle fontal gyrus,glimpse,unconscious,0.0006699933000669994
+sub-07,Middle fontal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Middle fontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Middle fontal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,conscious,unconscious,0.004369956300436996
+sub-07,Parahippocampal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,glimpse,glimpse,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Parahippocampal gyrus,unconscious,unconscious,9.99990000099999e-06
+sub-07,Pericalcarine cortex,conscious,conscious,9.99990000099999e-06
+sub-07,Pericalcarine cortex,conscious,glimpse,1.0
+sub-07,Pericalcarine cortex,conscious,unconscious,0.9583504164958351
+sub-07,Pericalcarine cortex,glimpse,conscious,1.0
+sub-07,Pericalcarine cortex,glimpse,glimpse,9.99990000099999e-06
+sub-07,Pericalcarine cortex,glimpse,unconscious,9.99990000099999e-06
+sub-07,Pericalcarine cortex,unconscious,conscious,0.26819731802681973
+sub-07,Pericalcarine cortex,unconscious,glimpse,9.99990000099999e-06
+sub-07,Pericalcarine cortex,unconscious,unconscious,0.48399516004839954
+sub-07,Precuneus,conscious,conscious,0.00037999620003799963
+sub-07,Precuneus,conscious,glimpse,0.00043999560004399956
+sub-07,Precuneus,conscious,unconscious,9.99990000099999e-06
+sub-07,Precuneus,glimpse,conscious,9.99990000099999e-06
+sub-07,Precuneus,glimpse,glimpse,9.99990000099999e-06
+sub-07,Precuneus,glimpse,unconscious,9.99990000099999e-06
+sub-07,Precuneus,unconscious,conscious,9.99990000099999e-06
+sub-07,Precuneus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Precuneus,unconscious,unconscious,0.998690013099869
+sub-07,Superior frontal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Superior frontal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-07,Superior frontal gyrus,conscious,unconscious,9.99990000099999e-06
+sub-07,Superior frontal gyrus,glimpse,conscious,0.2060479395206048
+sub-07,Superior frontal gyrus,glimpse,glimpse,1.999980000199998e-05
+sub-07,Superior frontal gyrus,glimpse,unconscious,9.99990000099999e-06
+sub-07,Superior frontal gyrus,unconscious,conscious,0.997470025299747
+sub-07,Superior frontal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Superior frontal gyrus,unconscious,unconscious,0.999790002099979
+sub-07,Superior parietal gyrus,conscious,conscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,conscious,glimpse,9.99990000099999e-06
+sub-07,Superior parietal gyrus,conscious,unconscious,0.05480945190548094
+sub-07,Superior parietal gyrus,glimpse,conscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,glimpse,glimpse,0.8541114588854112
+sub-07,Superior parietal gyrus,glimpse,unconscious,0.02146978530214698
+sub-07,Superior parietal gyrus,unconscious,conscious,9.99990000099999e-06
+sub-07,Superior parietal gyrus,unconscious,glimpse,9.99990000099999e-06
+sub-07,Superior parietal gyrus,unconscious,unconscious,2.999970000299997e-05

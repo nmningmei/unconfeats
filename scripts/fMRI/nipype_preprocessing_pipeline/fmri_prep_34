@@ -1,0 +1,17 @@
+
+#!/bin/bash
+
+# This is a script to send "0.1.preprocess fmri_session_4_run_7.py" as a batch job.
+# it works on dataset 34
+
+#$ -cwd
+#$ -o fmri_prep/out_47.txt
+#$ -e fmri_prep/err_47.txt
+#$ -m be
+#$ -q fsl.q
+#$ -M nmei@bcbl.eu
+#$ -N "fprep47"
+#$ -S /bin/bash
+
+module load rocks-python-3.6 rocks-fsl-5.0.10 rocks-freesurfer-6.0.0
+python "0.1.preprocess fmri_session_4_run_7.py"

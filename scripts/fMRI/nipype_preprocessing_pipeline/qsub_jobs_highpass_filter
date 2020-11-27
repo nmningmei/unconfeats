@@ -1,0 +1,15 @@
+
+#!/bin/bash
+
+# This is a script to send qsub_jobs_highpass_filter.py as a batch job.
+
+#$ -cwd
+#$ -o hpf/out_q.txt
+#$ -e hpf/err_q.txt
+#$ -m be
+#$ -M nmei@bcbl.eu
+#$ -N "qsubjobs"
+#$ -S /bin/bash
+
+module load rocks-python-3.6
+python "qsub_jobs_highpass_filter.py"
