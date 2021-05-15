@@ -1,0 +1,16 @@
+
+#!/bin/bash
+#PBS -q bcbl
+#PBS -l nodes=1:ppn=16
+#PBS -l mem=96gb
+#PBS -l cput=480:00:00
+#PBS -N S1_c_u
+#PBS -o bash/out_sub1_conscious_unconscious.txt
+#PBS -e bash/err_sub1_conscious_unconscious.txt
+cd $PBS_O_WORKDIR
+export PATH="/scratch/ningmei/anaconda3/bin:/scratch/ningmei/anaconda3/condabin:$PATH"
+source activate keras-2.1.6_tensorflow-2.0.0
+pwd
+echo "sub-01 conscious --> unconscious"
+
+python "LOO_conscious_unconscious_sub1.py"

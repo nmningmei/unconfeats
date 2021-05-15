@@ -88,9 +88,46 @@ except:
     pass#print('pymvpa is not installed')
 try:
 #    from tqdm import tqdm_notebook as tqdm
-    from tqdm.auto import tqdm
+    from tqdm import tqdm
 except:
     print('why is tqdm not installed?')
+
+def find_outliers(X, threshold=3.0, max_iter=2):
+    """Find outliers based on iterated Z-scoring.
+ 
+    This procedure compares the absolute z-score against the threshold.
+    After excluding local outliers, the comparison is repeated until no
+    local outlier is present any more.
+    
+    ########ATTENTION ATTENTION ATTENTION#####
+    # This function if removed from MNE-python code base
+
+    Parameters
+    ----------
+    X : np.ndarray of float, shape (n_elemenets,)
+        The scores for which to find outliers.
+    threshold : float
+        The value above which a feature is classified as outlier.
+    max_iter : int
+        The maximum number of iterations.
+ 
+    Returns
+    -------
+    bad_idx : np.ndarray of int, shape (n_features)
+        The outlier indices.
+    """
+    from scipy.stats import zscore
+    my_mask = np.zeros(len(X), dtype=np.bool)
+    for _ in range(max_iter):
+        X = np.ma.masked_array(X, my_mask)
+        this_z = np.abs(zscore(X))
+        local_bad = this_z > threshold
+        my_mask = np.max([my_mask, local_bad], 0)
+        if not np.any(local_bad):
+            break
+ 
+    bad_idx = np.where(my_mask)[0]
+    return bad_idx
 
 def preprocessing_conscious(raw,
                             events,
@@ -2797,6 +2834,7 @@ def check_LOO_cv(idxs_test_target,df_data_target,df_data_source):
         # the testing set for the source does NOT matter since we don't care its performance
         idxs_test_source.append(idx_test_source)
     return cv_warning,idxs_train_source,idxs_test_source
+
 def resample_ttest(x,
                    baseline         = 0.5,
                    n_ps             = 100,
@@ -3474,6 +3512,92 @@ def fill_results(scores,
     results['corr'] = corr
     results['positive_voxel_indices'] = positive_voxel_indices
     return scores.mean(1),results
+
+def get_array_from_dataframe(df,column_name):
+    return np.array([item for item in df[column_name].values[0].replace('[',
+                     '').replace(']',
+                        '').replace('\n',
+                          '').replace('  ',
+                            ' ').replace(',',' ').split(' ') if len(item) > 0],
+                    dtype = 'float32')
+
+def load_whole_brain_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,whole_brain_mask,
+                                label_map = {'Nonliving_Things': [0, 1], 'Living_Things': [1, 0]},
+                                preprocessing_steps = ['scale_data','clustering','permute_voxels'],
+                                kernel_size = None):
+    import gc
+    import numpy as np
+    import pandas as pd
+    
+    from sklearn import cluster
+    from sklearn.feature_selection import VarianceThreshold
+    from sklearn.preprocessing import MinMaxScaler
+    
+    from nilearn.input_data import NiftiMasker
+    
+    masker           = NiftiMasker(whole_brain_mask)
+    data             = masker.fit_transform(BOLD_file_name)
+    df_data          = pd.read_csv(csv_file_name)
+    df_data['id']    = df_data['session'] * 1000 + df_data['run'] * 100 + df_data['trials']
+    targets          = np.array([label_map[item] for item in df_data['targets'].values])
+    scaler           = make_pipeline(VarianceThreshold(),MinMaxScaler((-1,1)))
+    if 'scale_data' in preprocessing_steps:
+        print('scaling')
+        data         = scaler.fit_transform(data)
+    if 'clustering' in preprocessing_steps:
+        print('clustering')
+        gc.collect()
+        if kernel_size == None:
+            kernel_size = 8
+        CLUSTER      = cluster.DBSCAN(min_samples   = kernel_size,
+                                      metric        = 'correlation',
+                                      n_jobs        = -1,)
+        CLUSTER.fit(data.T)
+        idx          = np.argsort(CLUSTER.labels_)
+        data         = data[:,idx]
+    if ('permute_voxels' in preprocessing_steps) and ('clustering' not in preprocessing_steps):
+        np.random.seed(12345)
+        print('shuffling')
+        data         = np.random.shuffle(data.T).T
+    return data,df_data,targets,scaler
+
+def load_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,conscious_state,
+                                label_map = {'Nonliving_Things': [0, 1], 'Living_Things': [1, 0]},
+                                preprocessing_steps = ['scale_data','clustering','permute_voxels'],
+                                kernel_size = None):
+    import gc
+    import numpy as np
+    import pandas as pd
+    
+    from sklearn import cluster
+    from sklearn.feature_selection import VarianceThreshold
+    from sklearn.preprocessing import MinMaxScaler
+    
+    BOLD             = np.load(BOLD_file_name)
+    event            = pd.read_csv(csv_file_name)
+    roi_name         = csv_file_name.split('/')[-1].split('_events')[0]
+    idx_unconscious  = event['visibility'] == conscious_state
+    data             = BOLD[idx_unconscious]
+    df_data          = event[idx_unconscious].reset_index(drop=True)
+    df_data['id']    = df_data['session'] * 1000 + df_data['run'] * 100 + df_data['trials']
+    targets          = np.array([label_map[item] for item in df_data['targets'].values])
+    scaler           = make_pipeline(VarianceThreshold(),MinMaxScaler((-1,1)))
+    if 'scale_data' in preprocessing_steps:
+        data = scaler.fit_transform(data)
+    if 'clustering' in preprocessing_steps:
+        gc.collect()
+        if kernel_size == None:
+            kernel_size = 8
+        CLUSTER = cluster.DBSCAN(min_samples = kernel_size,
+                                 metric = 'correlation',
+                                 n_jobs = -1,)
+        CLUSTER.fit(data.T)
+        idx = np.argsort(CLUSTER.labels_)
+        data = data[:,idx]
+    if ('permute_voxels' in preprocessing_steps) and ('clustering' not in preprocessing_steps):
+        np.random.seed(12345)
+        data         = np.random.shuffle(data.T).T
+    return data,df_data,targets,scaler,roi_name
 ###################################################################################
 ###################################################################################
 import numpy as np
