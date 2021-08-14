@@ -2,9 +2,11 @@
 
 ---
 # System Information
+## Hardware
 - Platform:      Linux-3.10.0-514.el7.x86_64-x86_64-with-centos-7.3.1611-Core
-- Python:        3.6.3 |Anaconda, Inc.| (default, Nov 20 2017, 20:41:42)  [GCC 7.2.0]
 - CPU:           x86_64: 16 cores
+## Python environment
+- Python:        3.6.3 |Anaconda, Inc.| (default, Nov 20 2017, 20:41:42)  [GCC 7.2.0]
 - Numpy:         1.19.1 {blas=mkl_rt, lapack=mkl_rt}
 - Scipy:         1.3.1
 - Matplotlib:    3.1.3 {backend=agg}
@@ -16,9 +18,11 @@
 - Nilearn:       0.7.1
 - Nipype:        1.4.2
 - [LegrandNico/metadPy](https://github.com/LegrandNico/metadPy)
-
+## R environment - R base
 - R:             4.0.3 # for 3-way repeated measure ANOVAs
-
+## Brain image processing backends
+- mricrogl
+- mricron:       10.2014
 - FSL:           6.0.0
 - Freesurfer:    6.0.0
 
