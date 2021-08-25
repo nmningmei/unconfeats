@@ -38,8 +38,8 @@ torch.manual_seed(12345)
 
 # experiment control
 model_dir               = '../models'
-train_folder            = 'grayscaled'
-valid_folder            = 'experiment_images_grayscaled'
+train_folder            = 'greyscaled'
+valid_folder            = 'experiment_images_greyscaled'
 train_root              = f'../data/{train_folder}/'
 valid_root              = f'../data/{valid_folder}'
 print_train             = True #
@@ -48,8 +48,8 @@ batch_size              = 8
 lr                      = 1e-4
 n_epochs                = int(1e3)
 device                  = 'cpu'
-pretrain_model_name     = 'resnet'
-hidden_units            = 100
+pretrain_model_name     = 'vgg19_bn'
+hidden_units            = 20
 hidden_func_name        = 'relu'
 hidden_activation       = hidden_activation_functions(hidden_func_name)
 hidden_dropout          = 0.
@@ -171,7 +171,7 @@ for var in noise_levels:
         model_to_train      = torch.load(f_name)
         loss_func,optimizer = createLossAndOptimizer(model_to_train,learning_rate = lr)
         # evaluate the model
-        y_trues,y_preds,scores,features,labels = behavioral_evaluate(
+        y_trues,y_preds,features,labels = behavioral_evaluate(
                                                         model_to_train,
                                                         n_experiment_runs,
                                                         loss_func,
@@ -179,8 +179,9 @@ for var in noise_levels:
                                                         device,
                                                         categorical         = categorical,
                                                         output_activation   = output_activation,
-                                                        image_type          = f'{var:1.1e} noise',
                                                         )
+        
+        print(var.round(5),metrics.roc_auc_score(y_trues,y_preds))
 
         # estimate chance level scores
         np.random.seed(12345)
@@ -228,7 +229,8 @@ for var in noise_levels:
             confidence = y_preds.copy()
         results['confidence_mean'   ].append(np.mean(confidence))
         results['confidence_std'    ].append(np.std(confidence))
-
+        print(var.round(5),np.mean(scores))
+        
         # save example noisy images
         print('plotting example images')
 

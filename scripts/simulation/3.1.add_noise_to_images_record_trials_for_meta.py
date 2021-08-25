@@ -34,8 +34,8 @@ from matplotlib import pyplot as plt
 
 # experiment control
 model_dir               = '../models'
-train_folder            = 'grayscaled'
-valid_folder            = 'experiment_images_grayscaled'
+train_folder            = 'greyscaled'
+valid_folder            = 'experiment_images_greyscaled'
 train_root              = f'../data/{train_folder}/'
 valid_root              = f'../data/{valid_folder}'
 print_train             = True #
@@ -52,7 +52,7 @@ hidden_dropout          = 0.
 patience                = 5
 output_activation       = 'softmax'
 model_saving_name       = f'{pretrain_model_name}_{hidden_units}_{hidden_func_name}_{hidden_dropout}_{output_activation}'
-testing                 = True #
+testing                 = False #
 n_experiment_runs       = 20
 
 n_noise_levels          = 50
@@ -170,101 +170,6 @@ torch.manual_seed(12345)
 
 print(f'device:{device}')
 
-noise_levels        = np.concatenate([[0],[item for item in np.logspace(-1,2,n_noise_levels)]])
 
-saving_name         = os.path.join(results_dir,model_saving_name,'trial_by_trial ({}).csv')
-
-for var in noise_levels:
-    var = round(var,5)
-    # define augmentation function + noise function
-    augmentations = {
-            'visualize':transforms.Compose([
-            transforms.Resize((image_resize,image_resize)),
-            transforms.RandomHorizontalFlip(p = 0.5),
-            transforms.RandomRotation(45,),
-            transforms.RandomVerticalFlip(p = 0.5,),
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: noise_fuc(x,var)),
-            ]),
-            'valid':transforms.Compose([
-            transforms.Resize((image_resize,image_resize)),
-            transforms.RandomHorizontalFlip(p = 0.5),
-            transforms.RandomRotation(25,),
-            transforms.RandomVerticalFlip(p = 0.5,),
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: noise_fuc(x,var)),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ]),
-        }
-
-    valid_loader        = data_loader(
-            valid_root,
-            augmentations   = augmentations['valid'],
-            batch_size      = batch_size,
-            # here I turn on the shuffle like it is in a real experiment
-            )
-    visualize_loader = data_loader(
-            valid_root,
-            augmentations = augmentations['visualize'],
-            batch_size = 2 * batch_size,
-            )
-    # load model architecture
-    print('loading the trained model')
-    model_to_train = build_model(
-                    pretrain_model_name,
-                    hidden_units,
-                    hidden_activation,
-                    hidden_dropout,
-                    output_units,
-                    )
-    model_to_train.to(device)
-    for params in model_to_train.parameters():
-        params.requires_grad = False
-
-    f_name = os.path.join(model_dir,model_saving_name,model_saving_name+'.pth')
-    # load trained model
-    model_to_train      = torch.load(f_name)
-    loss_func,optimizer = createLossAndOptimizer(model_to_train,learning_rate = lr)
-    # evaluate the model
-    y_trues,y_preds,scores,features,labels = behavioral_evaluate(
-                                                    model_to_train,
-                                                    n_experiment_runs,
-                                                    loss_func,
-                                                    valid_loader,
-                                                    device,
-                                                    categorical         = categorical,
-                                                    output_activation   = output_activation,
-                                                    image_type          = f'{var:1.1e} noise',
-                                                    )
-    # estimate chance level scores
-    np.random.seed(12345)
-    chance_scores   = [metrics.roc_auc_score(y_true.detach().cpu().numpy(),
-                                           shuffle(y_pred.detach().cpu().numpy())) for y_true,y_pred in zip(
-                            y_trues,y_preds)]
-    pval            = resample_ttest_2sample(np.array(scores),np.array(chance_scores))
-
-    results             = OrderedDict()
-
-    if categorical:
-        confidence = torch.cat(y_preds).cpu().numpy().max(1)
-        results['y_pred'] = torch.cat(y_preds).detach().cpu().numpy()[:,-1]
-        results['y_true'] = torch.cat(y_trues).detach().cpu().numpy()[:,-1]
-    else:
-        temp = torch.cat(y_preds).cpu().numpy()
-        temp[temp < 0.5] = 1- temp[temp < 0.5]
-        confidence = temp.copy().flatten()
-        results['y_pred'] = torch.cat(y_preds).detach().cpu().numpy().flatten()
-        results['y_true'] = torch.cat(y_trues).detach().cpu().numpy().flatten()
-
-    results['confidence'] = confidence
-    results_to_save = pd.DataFrame(results)
-    results_to_save['pretrain_model_name'] = pretrain_model_name
-    results_to_save['hidden_units'] = hidden_units
-    results_to_save['hidden_activation'] = hidden_func_name
-    results_to_save['hidden_dropout'] = hidden_dropout
-    results_to_save['output_activation'] = output_activation
-    results_to_save['block'] = np.repeat(np.arange(n_experiment_runs),96)
-    results_to_save['noise_level'] = round(var,5)
-    results_to_save.to_csv(saving_name.format(round(var,5)),index = False)
 
 print('done')

@@ -112,6 +112,14 @@ g               = sns.relplot(
 (g.set_axis_labels('Noise Level','ROC AUC')
   .set_titles('{col_name} {row_name}'))
 handles, labels             = g.axes[0][0].get_legend_handles_labels()
+temp = []
+for item in labels:
+    if item == 'drop':
+        item = 'Dropout rate'
+    elif item == 'hidden_units':
+        item = '# of hidden units'
+    temp.append(item)
+labels = temp
 # convert the circle to irrelevant patches
 handles[1]                  = Patch(facecolor = 'black')
 handles[2]                  = Patch(facecolor = 'blue',)
@@ -213,6 +221,24 @@ g                               = sns.relplot(
             alpha               = 1.,
             lw                  = 1,
             ) for ax in g.axes.flatten()]
+[ax.axvline(bins[1],
+            linestyle           = '--',
+            color               = 'red',
+            alpha               = 1.,
+            lw                  = 1,
+            ) for ax in g.axes.flatten()]
+[ax.text(bins[1] - 0.7,
+         0.67,
+         'Low noise',
+         rotation = 90, 
+         va = 'center',
+         ) for ax in g.axes.flatten()[:1]]
+[ax.text(bins[1] + 0.1,
+         0.67,
+         'High noise',
+         rotation = 270, 
+         va = 'center',
+         ) for ax in g.axes.flatten()[:1]]
 
 temp = []
 for model_name,ax in zip(['alexnet','vgg19','mobilenet','densenet','resnet',],g.axes.flatten()):
@@ -224,7 +250,7 @@ for model_name,ax in zip(['alexnet','vgg19','mobilenet','densenet','resnet',],g.
     counter['model_name'] = model_name
     temp.append(counter)
     
-    ax.axvline(bins[1],linestyle = '--' ,color = 'black', alpha = 0.6)
+    # ax.axvline(bins[1],linestyle = '--' ,color = 'black', alpha = 0.6)
     
     tiny_ax = ax.inset_axes([.6,.6,.3,.3])
     tiny_ax = sns.barplot(x = 'groups',
@@ -247,6 +273,14 @@ df_proportion.to_csv(os.path.join(paper_dir.replace('figures','stats'),
                                   'CNN_chance_decode_proportion.csv'),
                      index = False)
 handles, labels                 = g.axes[0][0].get_legend_handles_labels()
+temp = []
+for item in labels:
+    if item == 'drop':
+        item = 'Dropout rate'
+    elif item == 'hidden_units':
+        item = '# of hidden units'
+    temp.append(item)
+labels = temp
 [handles.append(item) for item in tiny_handles]
 [labels.append(item) for item in ['Decode Above Chance','Decode At Chance']]
 g._legend.remove()

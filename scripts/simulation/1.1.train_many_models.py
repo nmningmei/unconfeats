@@ -53,7 +53,7 @@ from utils_deep import (data_loader,
 # experiment control
 model_dir               = '../models'
 train_folder            = 'greyscaled'
-valid_folder            = 'experiment_images_grayscaled'
+valid_folder            = 'experiment_images_greyscaled'
 train_root              = f'../data/{train_folder}/'
 valid_root              = f'../data/{valid_folder}'
 print_train             = True #
@@ -62,8 +62,8 @@ batch_size              = 8
 lr                      = 1e-4
 n_epochs                = int(1e3)
 device                  = 'cpu'
-pretrain_model_name     = 'mobilenet'
-hidden_units            = 2
+pretrain_model_name     = 'vgg19_bn'
+hidden_units            = 20
 hidden_func_name        = 'relu'
 hidden_activation       = hidden_activation_functions(hidden_func_name)
 hidden_dropout          = 0.
