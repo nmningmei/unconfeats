@@ -2,7 +2,7 @@
 
 ---
 ## Experiment settings
-`
+```
 # folder for saving the trained models
 model_dir               = '../models'
 # folder that contains the training images
@@ -49,7 +49,7 @@ n_permutations          = int(1e4)
 # we elected to add one example of only noise to the batch to make the FCNN less sensitive to noise
 (and here indicate see [Figure]() in the repository showing the drop in FCNN performance from 1 to 0.8 with little noise chance) 
 n_noise                 = 1
-`
+```
 
 ---
 ## Training
