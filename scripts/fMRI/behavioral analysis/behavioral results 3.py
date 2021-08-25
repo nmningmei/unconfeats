@@ -98,6 +98,9 @@ res = dict(sub = [],
            dprime = [],
            pval = [],
            chance = [],
+           N = [],
+           probe_mean = [],
+           probe_std = [],
            )
 for ((sub,vis),df_sub) in df.groupby(['sub','visible.keys_raw']):
     df_sub = df_sub.sort_values(['session','block','order'])
@@ -127,8 +130,15 @@ for ((sub,vis),df_sub) in df.groupby(['sub','visible.keys_raw']):
     res['dprime'].append(np.nanmean(scores))
     res['pval'].append(pval)
     res['chance'].append(np.nanmean(chance_level))
+    res['N'].append(df_sub.shape[0])
+    res['probe_mean'].append(np.nanmean(df_sub['probe_Frames_raw'].values*10))
+    res['probe_std'].append(np.nanstd(df_sub['probe_Frames_raw'].values*10))
 
 results = pd.DataFrame(res)
+total = results['N'].values
+results['total'] = np.repeat(total.reshape(-1,3).sum(1),3)
+results['proportion'] = results['N'] / results['total']
+results['report'] = [f'{x["probe_mean"]:.2f}+/-{x["probe_std"]:.2f}' for ii,x in results.iterrows()]
 
 df_plot = results.copy()
 temp = []
@@ -141,14 +151,35 @@ for vis,df_sub in df_plot.groupby(['sub']):
 df_plot = pd.concat(temp)
 df_plot['Behavioral' ] = df_plot['pval'] < 0.05
 df_plot['Behavioral' ] = df_plot['Behavioral'].map({True:'Above Chance',False:'At Chance'})
-df_plot['visibility' ] = df_plot['visibility'].map({
+df_plot['awareness' ] = df_plot['visibility'].map({
         1:'Unconscious',
         2:'Glimpse',
         3:'Conscious',})
-df_plot = df_plot.sort_values(['visibility','sub'],ascending = False)
+df_plot = df_plot.sort_values(['sub','visibility',])
+df_plot['subject'] = df_plot['sub'].map(utils.subj_map())
+df_plot = df_plot.sort_values(['subject','visibility',])
+df_plot.to_csv(os.path.join(paper_dir.replace('figures','stats'),'dprime behavioral.csv'),index = False)
+
+# metadprime
+df_meta_dprime = pd.read_csv(os.path.join(paper_dir.replace('figures','stats'),'behavioral metad.csv'))
+
+temp = []
+for sub,df_sub in df_plot.groupby(['sub']):
+    df_meta_sub = df_meta_dprime[df_meta_dprime['sub'] == sub]
+    df_sub['meta dprime'] = df_meta_sub['metad'].values[0]
+    df_sub['overall dprime'] = df_meta_sub['dprime'].values[0]
+    df_sub['m_ratio'] = df_meta_sub['m_ratio'].values[0]
+    df_sub['m_diff'] = df_meta_sub['m_diff'].values[0]
+    temp.append(df_sub)
+df_meta_d_added = pd.concat(temp)
+
+df_meta_d_added.to_csv(os.path.join(paper_dir.replace('figures','stats'),
+                                    'supplemental behavioral report.csv'),
+          index = False)
+
 fig,ax = plt.subplots(figsize = (16,12))
 ax = sns.swarmplot(
-                 x      = 'visibility',
+                 x      = 'awareness',
                  y      = 'dprime',
                  hue    = 'Behavioral',
                  size   = 18,
@@ -159,7 +190,6 @@ ax.set_xlabel('Conscious State')
 ax.set_ylabel(ylabel)
 ax.get_legend().set_title("")
 
-df_plot.to_csv(os.path.join(paper_dir.replace('figures','stats'),'dprime behavioral.csv'),index = False)
 fig.savefig(os.path.join(paper_dir,'dprime behavioral.jpg'),
             dpi = 300,
             bbox_inches = 'tight')

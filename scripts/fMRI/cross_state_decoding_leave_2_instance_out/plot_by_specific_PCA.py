@@ -19,19 +19,19 @@ import seaborn as sns
 sns.set_context('poster',font_scale = 1.5)
 from matplotlib import rc
 rc('font',weight = 'bold')
-plt.rcParams['axes.labelsize'] = 40
+from matplotlib import pyplot as plt
+plt.rcParams['axes.labelsize'] = 45
 plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['axes.titlesize'] = 40
+plt.rcParams['axes.titlesize'] = 45
 plt.rcParams['axes.titleweight'] = 'bold'
 plt.rcParams['ytick.labelsize'] = 32
 plt.rcParams['xtick.labelsize'] = 32
 
 from shutil import copyfile
-copyfile('../../../utils.py','utils.py')
+copyfile('../../../../scripts/utils.py','utils.py')
 import utils
-folder_name = 'decoding_13_11_2020'
-working_dir = f"../../../../results/MRI/nilearn/{folder_name}/sub*"
-figure_dir = '../../../../figures/MRI/nilearn/collection_of_results'
+working_dir = "../../../../results/MRI/nilearn/decoding_13_11_2020/sub*"
+figure_dir = '../../../../figures/MRI/nilearn/collection_of_results_PCA'
 if not os.path.exists(figure_dir):
     os.mkdir(figure_dir)
 
@@ -39,7 +39,7 @@ paper_dir = '/export/home/nmei/nmei/properties_of_unconscious_processing/stats'
 
 n_permutation = int(1e5)
 
-file_names = [item for item in glob(os.path.join(working_dir,'*.csv')) if ('PCA' not in item)]
+file_names = [item for item in glob(os.path.join(working_dir,'*.csv')) if ('PCA' in item)]
 
 df = []
 for f in tqdm(file_names):
@@ -64,20 +64,8 @@ sort_by = ['sub','roi_name','region','condition_target','condition_source',
            'feature_selector','estimator']
 inverse_dict = {value:key for key,value in utils.rename_ROI_for_plotting().items()}
 
-
-#
-temp = []
-for _attrs,df_sub in df_plot.groupby(['sub','roi','model','condition_source','condition_target']):
-    df_data = pd.read_csv(f'../../../../data/BOLD_average_BOLD_average_lr/{_attrs[0]}/{_attrs[1]}_events.csv')
-    df_data = df_data[df_data['visibility'] == _attrs[-1]]
-    df_sub['living'] = df_sub['tp'] + df_sub['fn']
-    df_sub['nonliving'] = df_sub['tn'] + df_sub['fp']
-    df_sub['new_roc_auc'] = df_sub['roc_auc'] * (df_sub['living'] + df_sub['nonliving'])/(df_sub['living'].sum()+df_sub['nonliving'].sum()) * df_sub.shape[0]
-    temp.append(df_sub)
-df_plot = pd.concat(temp)
-
-stat_file_name = f'{folder_name}_stat.csv'
-if not os.path.exists(os.path.join(paper_dir,stat_file_name)):
+stat_file_name = 'decoding_stat.csv'
+if True:#not os.path.exists(os.path.join(paper_dir,stat_file_name)):
     df_chance = df_plot[df_plot['estimator'] == 'Dummy'].sort_values(sort_by)
     df_decode = df_plot[df_plot['estimator'] != 'Dummy'].sort_values(sort_by)
     
@@ -108,14 +96,14 @@ if not os.path.exists(os.path.join(paper_dir,stat_file_name)):
         df_stat['condition_target'].append(attrs[3])
         df_stat['p'].append(p)
     df_stat = pd.DataFrame(df_stat)
-    df_stat.to_csv(os.path.join(paper_dir,
-                                stat_file_name),
-                   index = False)
+#    df_stat.to_csv(os.path.join(paper_dir,
+#                                stat_file_name),
+#                   index = False)
     
 else:
     df_stat = pd.read_csv(os.path.join(paper_dir,stat_file_name))
-df_stat['sub'] = df_stat['sub'].map(utils.subj_map())
-df_plot['sub'] = df_plot['sub'].map(utils.subj_map())
+
+
 temp = []
 for sub,df_sub in df_stat.groupby(['sub']):
     df_sub = df_sub.sort_values(['p'])
@@ -127,18 +115,20 @@ df_stat = pd.concat(temp)
 
 df_stat['star'] = df_stat['ps_corrected'].apply(utils.stars)
 
-x_order = ['Pericalcarine cortex',
-           'Lingual',
-           'Lateral occipital cortex',
-           'Fusiform gyrus',
-           'Inferior temporal lobe', 
-           'Parahippocampal gyrus',
-           'Precuneus',
-           'Superior parietal gyrus',
+
+
+x_order = ['Lateral occipital cortex',
+           'Pericalcarine cortex',
+           'Fusiform gyrus', 
            'Inferior parietal lobe',
-           'Superior frontal gyrus',
+           'Superior parietal gyrus',
+           'Precuneus',
+           'Lingual',
+           'Parahippocampal gyrus',
+           'Inferior temporal lobe',
+           'Inferior frontal gyrus',
            'Middle fontal gyrus',
-           'Inferior frontal gyrus',]
+           'Superior frontal gyrus',]
 x_order = {name:ii for ii,name in enumerate(x_order)}
 
 df_plot['x_order'] = df_plot['roi_name'].map(x_order)
@@ -154,8 +144,6 @@ sort_by = ['sub',
 df_plot = df_plot.sort_values(sort_by)
 df_plot = df_plot[df_plot['estimator'] != 'Dummy']
 df_stat = df_stat.sort_values(sort_by)
-
-df_plot['roc_auc'] = df_plot['new_roc_auc']
 
 fig,axes = plt.subplots(figsize = (7*5,7*5),
                         nrows = 7,
@@ -258,73 +246,18 @@ for n in range(7):
     
     ax.set(ylim = (0.35,0.95))
 [ax.axhline(0.5,linestyle = '--',color = 'black',alpha = 0.5) for ax in axes.flatten()]
-[ax.axvline(8.5,linestyle = '-', color = 'black',alpha = 0.5) for ax in axes.flatten()]
-
-for ii,(ax,(sub,df_stat_sub)) in enumerate(zip(axes,df_stat.groupby(['sub']))):
-    if ii >=4:
-        props = dict(boxstyle = 'round',facecolor = 'red',alpha = .5)
-        ax[0].text(1,.75,f'Observer {ii+1}',fontsize = 32,bbox = props)
-    else:
-        props = dict(boxstyle = 'round',facecolor = None,alpha = .5)
-        ax[0].text(1,.75,f'Observer {ii+1}',fontsize = 32,bbox = props)
+[ax.axvline(6.5,linestyle = '-', color = 'black',alpha = 0.5) for ax in axes.flatten()]
 
 fig.savefig(os.path.join(paper_dir.replace('stats','figures'),
-                         f'{folder_name}_specific.jpeg'),
+                         'LOO_specific_pca.jpeg'),
             dpi = 450,
             bbox_inches = 'tight')
 fig.savefig(os.path.join(paper_dir.replace('stats','figures'),
-                         f'{folder_name}_specific_light.jpeg'),
+                         'LOO_specific_pca_light.jpeg'),
             # dpi = 450,
             bbox_inches = 'tight')
 
 
-df_unconscious = df_plot.copy()
-df_unconscious = df_unconscious[np.logical_and(
-                df_unconscious['condition_source'] == 'unconscious',
-                df_unconscious['condition_target'] == 'unconscious')]
-#k = temp.groupby(['sub', 'roi','model', 'condition_target', 'condition_source'])
-df_unconscious = df_unconscious.groupby(['sub',
-                                         'roi',
-                                         'condition_target',
-                                         'condition_source',
-                                         'roi_name']).mean().reset_index()
-df_unconscious['picked'] = df_unconscious['sub'].map({'sub-01':'At chance',
-                                                      'sub-02':'At chance',
-                                                      'sub-03':'At chance',
-                                                      'sub-04':'At chance',
-                                                      'sub-05':'Above Chance',
-                                                      'sub-06':'Above Chance',
-                                                      'sub-07':'Above Chance'})
-fig,ax = plt.subplots(figsize = (26,6))
-ax = sns.violinplot(x = 'roi_name',
-                    y = 'roc_auc',
-                    order = list(x_order.keys()),
-                    hue = 'picked',
-                    kind = 'violin',
-                    data = df_unconscious,
-                    split = True,
-                    aspect = 3.5,
-                    cut = 0,
-                    inner = 'quartile',
-                    palette = ['deepskyblue','red'],
-                    scale = 'width',
-                    ax = ax,)
-ax.axhline(0.5,linestyle = '--',color = 'black',alpha = 0.6)
-ax.set(xlabel = 'ROI',ylabel = 'ROC AUC',
-       ylim = (0.4,0.75))
-ax.legend(loc = 'upper right')
-ax.get_legend().set_title("")
-ax.set_xticklabels(list(x_order.keys()),
-                   rotation = 45,
-                   ha = 'right')
-fig.savefig(os.path.join(paper_dir.replace('stats','figures'),
-                         f'{folder_name}_2_groups.jpeg'),
-            dpi = 450,
-            bbox_inches = 'tight')
-fig.savefig(os.path.join(paper_dir.replace('stats','figures'),
-                         f'{folder_name}_2_groups_light.jpeg'),
-            # dpi = 450,
-            bbox_inches = 'tight')
 
 
 

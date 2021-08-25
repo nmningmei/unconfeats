@@ -94,10 +94,19 @@ ylabel = "A'"
 
 df              = []
 for f in working_data:
-    df_temp         = pd.read_csv(f).dropna()
+    df_temp         = pd.read_csv(f).iloc[:32,:]
     df_temp['sub']  = f.split('/')[-3]
+    numerical_columns   = ['probe_Frames_raw',
+                           'response.keys_raw',
+                           'visible.keys_raw',]
+    for col_name in numerical_columns:
+        try:
+            df_temp[col_name]    = df_temp[col_name].apply(utils.extract)
+        except:
+            df_temp[col_name]    = df_temp['probeFrames_raw'].apply(utils.extract)
     df.append(df_temp)
 df                  = pd.concat(df)
+
 if re_run:
     n_sim       = int(1e5)
     n_sample    = int(2e3)

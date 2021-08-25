@@ -30,7 +30,7 @@ plt.rcParams['axes.titleweight'] = 'bold'
 plt.rcParams['ytick.labelsize'] = 32
 plt.rcParams['xtick.labelsize'] = 32
 
-working_dir     = '../results/first_layer'
+working_dir     = '../results/_first_layer'
 figure_dir      = '../figures'
 marker_factor   = 10
 marker_type     = ['8','s','p','*','+','D','o']

@@ -23,6 +23,8 @@ from sklearn.metrics         import roc_auc_score
 from sklearn.utils           import shuffle as sk_shuffle
 from sklearn.preprocessing   import MinMaxScaler
 
+
+
 def candidate_pretrained_CNNs(model_name = 'alexnet',pretrained = True):
     picked_models = dict(
             resnet18        = models.resnet18(pretrained            = pretrained,

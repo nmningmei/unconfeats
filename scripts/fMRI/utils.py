@@ -1093,8 +1093,8 @@ def add_track(df_sub):
     df_sub['n_volume'] = n_rows
     df_sub['time_indices'] = temp
     return df_sub
-def groupby_average(fmri,df,groupby = ['trials']):
-    BOLD_average = np.array([np.mean(fmri[df_sub.index],0) for _,df_sub in df.groupby(groupby)])
+def groupby_average(fmri,df,groupby = ['trials'],axis = 0):
+    BOLD_average = np.array([np.mean(fmri[df_sub.index],axis) for _,df_sub in df.groupby(groupby)])
     df_average = pd.concat([add_track(df_sub) for ii,df_sub in df.groupby(groupby)])
     return BOLD_average,df_average
 
@@ -2460,7 +2460,8 @@ def build_model_dictionary(print_train = False,
                            l1 = False,
                            n_jobs = 1,
                            C = 1,
-                           tol = 1e-2):
+                           tol = 1e-2,
+                           ):
     np.random.seed(12345)
     if l1:
         svm = LinearSVC(penalty = 'l1', # not default
@@ -2719,42 +2720,31 @@ def check_train_test_splits(idxs_test):
                     temp.append(len(set(sample1).intersection(set(sample2))) == len(sample1))
     temp = np.array(temp)
     return any(temp)
-def check_train_balance(df,idx_train,keys):
+def check_train_balance(df,idx_train,keys = ['Living_Things','Nonliving_Things'],tol = 20):
     """
     check the balance of the training set.
-    if only one of the classes has more 2 instances than the other
+    if only one of the classes has more {tol} instances than the other
     we will randomly take out those 'extra instances' from the major
     class
     """
-    Counts = dict(Counter(df.iloc[idx_train]['targets'].values))
-    if np.abs(Counts[keys[0]] - Counts[keys[1]]) > 2:
+    np.random.seed(12345)
+    from sklearn.utils import shuffle as sk_shuffle
+    
+    df = df.copy().iloc[idx_train]
+    Counts = dict(Counter(df['targets'].values))
+    if np.abs(Counts[keys[0]] - Counts[keys[1]]) > tol:
         if Counts[keys[0]] > Counts[keys[1]]:
             key_major = keys[0]
             key_minor = keys[1]
         else:
             key_major = keys[1]
             key_minor = keys[0]
-            
-        ids_major = df.iloc[idx_train]['id'][df.iloc[idx_train]['targets'] == key_major]
+        idx_train_minor = idx_train[df['targets'] == key_minor]
+        idx_train_major = idx_train[df['targets'] == key_major]
+        idx_train_major_picked = np.random.choice(idx_train_major,size = idx_train_minor.shape,replace = False)
         
-        idx_train_new = idx_train.copy()
-        for n in range(len(idx_train_new)):
-            random_pick = np.random.choice(np.unique(ids_major),size = 1)[0]
-            # print(random_pick,np.unique(ids_major))
-            idx_train_new = np.array([item for item,id_temp in zip(idx_train_new,df.iloc[idx_train_new]['id']) if (id_temp != random_pick)])
-            ids_major = np.array([item for item in ids_major if (item != random_pick)])
-            new_counts = dict(Counter(df.iloc[idx_train_new]['targets']))
-            if np.abs(new_counts[keys[0]] - new_counts[keys[1]]) > 3:
-                if new_counts[keys[0]] > new_counts[keys[1]]:
-                    key_major = keys[0]
-                    key_minor = keys[1]
-                else:
-                    key_major = keys[1]
-                    key_minor = keys[0]
-                
-                ids_major = df.iloc[idx_train_new]['id'][df.iloc[idx_train_new]['targets'] == key_major]
-            elif np.abs(new_counts[keys[0]] - new_counts[keys[1]]) < 3:
-                break
+        idx_train_new = sk_shuffle(np.concatenate([idx_train_major_picked,
+                                                   idx_train_minor]))
         return idx_train_new
     else:
         return idx_train
@@ -2821,7 +2811,10 @@ def check_LOO_cv(idxs_test_target,df_data_target,df_data_source):
             else:
                 idx_test_source.append(list(df_data_source_sub.index))
         idx_train_source        = np.concatenate(idx_train_source)
-        idx_test_source         = idx_train_source.copy()
+        if len(idx_test_source) > 0:
+            idx_test_source     = np.concatenate(idx_test_source)
+        else:
+            idx_test_source     = idx_train_source.copy()
         
         # check if the training and testing have subcategory overlapping
         target_set              = set(pd.unique(df_data_target.iloc[idx_test_target]['labels']))
@@ -3521,26 +3514,28 @@ def get_array_from_dataframe(df,column_name):
                             ' ').replace(',',' ').split(' ') if len(item) > 0],
                     dtype = 'float32')
 
-def load_whole_brain_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,whole_brain_mask,
+def load_whole_brain_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,masker,
                                 label_map = {'Nonliving_Things': [0, 1], 'Living_Things': [1, 0]},
                                 preprocessing_steps = ['scale_data','clustering','permute_voxels'],
-                                kernel_size = None):
+                                kernel_size = None,
+                                scaler = None):
     import gc
     import numpy as np
     import pandas as pd
     
     from sklearn import cluster
-    from sklearn.feature_selection import VarianceThreshold
+    from sklearn.utils import shuffle
     from sklearn.preprocessing import MinMaxScaler
     
-    from nilearn.input_data import NiftiMasker
+#    from nilearn.input_data import NiftiMasker
     
-    masker           = NiftiMasker(whole_brain_mask)
-    data             = masker.fit_transform(BOLD_file_name)
+#    masker           = NiftiMasker(whole_brain_mask).fit()
+    data             = masker.transform(BOLD_file_name)
     df_data          = pd.read_csv(csv_file_name)
     df_data['id']    = df_data['session'] * 1000 + df_data['run'] * 100 + df_data['trials']
     targets          = np.array([label_map[item] for item in df_data['targets'].values])
-    scaler           = make_pipeline(VarianceThreshold(),MinMaxScaler((-1,1)))
+    if scaler is None:
+        scaler       = MinMaxScaler((-1,1))
     if 'scale_data' in preprocessing_steps:
         print('scaling')
         data         = scaler.fit_transform(data)
@@ -3555,10 +3550,14 @@ def load_whole_brain_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,whole_b
         CLUSTER.fit(data.T)
         idx          = np.argsort(CLUSTER.labels_)
         data         = data[:,idx]
+    else:
+        print('no clustering')
     if ('permute_voxels' in preprocessing_steps) and ('clustering' not in preprocessing_steps):
         np.random.seed(12345)
         print('shuffling')
-        data         = np.random.shuffle(data.T).T
+        data         = np.stack([shuffle(item.copy()) for item in data])
+    else:
+        print('not shuffled')
     return data,df_data,targets,scaler
 
 def load_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,conscious_state,
@@ -3596,7 +3595,7 @@ def load_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,conscious_state,
         data = data[:,idx]
     if ('permute_voxels' in preprocessing_steps) and ('clustering' not in preprocessing_steps):
         np.random.seed(12345)
-        data         = np.random.shuffle(data.T).T
+        data         = np.stack([shuffle(item.copy()) for item in data])
     return data,df_data,targets,scaler,roi_name
 ###################################################################################
 ###################################################################################
