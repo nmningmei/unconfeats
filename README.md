@@ -26,3 +26,12 @@
 - FSL:           6.0.0
 - Freesurfer:    6.0.0
 
+# Main results
+
+## MVPA as a function of awareness states
+![decode](https://github.com/nmningmei/unconfeats/blob/main/figures/decoding.jpg)
+
+## Simulation - full
+![cnn_full](https://github.com/nmningmei/unconfeats/blob/main/figures/CNN_performance_light.jpeg)
+
+![cnn_chance]()
