@@ -53,13 +53,47 @@ n_noise                 = 1
 
 ---
 ## Training
-
+```
+train_loop(net, # the model for training - CNN layer + hidden (dense) layer + output (dense) layer
+           loss_func, # Binary cross entropy loss
+           optimizer, # ADAM with learning rate of 1e-4
+           dataloader, # dataloader with a batch size of 8 and simple augmentations
+           device, # where to perform the computations, either on GPU or CPUs
+           categorical          = True, # determined by the output layer
+           idx_epoch            = 1, # determined by the outer loop of the training epochs
+           print_train          = False, # whether to print the training progress
+           output_activation    = 'softmax', # to call the output activation function
+           l2_lambda            = 0, # the L2 proportion
+           l1_lambda            = 0, # the L1 proportion
+           n_noise              = 0, # number of images that contain only Gaussion noise
+           use_hingeloss        = False, # you can use hingloss, but it will require you to modify the output of the model
+           )
+```
 ### [Check the binary entropy loss for 0.5 probability labels](https://github.com/nmningmei/unconfeats/blob/main/scripts/simulation/scripts/0.1.binary_cross_entropy_loss.py)
 
 ## Validation
-
+```
+validation_loop(net,# the model for training - CNN layer + hidden (dense) layer + output (dense) layer
+                loss_func,# Binary cross entropy loss
+                dataloader,# dataloader with a batch size of 8 and simple augmentations
+                device,# where to perform the computations, either on GPU or CPUs
+                categorical = True,# determined by the output layer
+                output_activation = 'softmax',# to call the output activation function
+                verbose = 0,# whether to print the training progress
+                )
+```
 ## Testing
-
+```
+behavioral_evaluate(net,# the model for training - CNN layer + hidden (dense) layer + output (dense) layer
+                    n_experiment_runs,# number of cycles of 96 unique object images that fed to the model
+                    loss_func,# Binary cross entropy loss
+                    dataloader,# dataloader with a batch size of 8 and simple augmentations
+                    device,# where to perform the computations, either on GPU or CPUs
+                    categorical = True,# determined by the output layer
+                    output_activation = 'softmax',# to call the output activation function
+                    verbose = 0,# whether to print the training progress
+                    )
+```
 ## Results
 
 ### Trained with one example of only noise added to the training batches
