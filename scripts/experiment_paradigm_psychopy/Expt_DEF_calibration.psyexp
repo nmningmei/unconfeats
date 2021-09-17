@@ -1,0 +1,448 @@
+<?xml version="1.0" ?>
+<PsychoPy2experiment encoding="utf-8" version="1.85.3">
+  <Settings>
+    <Param name="Monitor" updates="None" val="testMonitor" valType="str"/>
+    <Param name="color" updates="None" val="black" valType="str"/>
+    <Param name="colorSpace" updates="None" val="rgb" valType="str"/>
+    <Param name="Experiment info" updates="None" val="{u'n_square': u'32', u'probeFrames': u'5', u'participant': u'', u'session': u'001', u'image_size': u'256', u'premask_dur': u'20', u'postmask_dur': u'20'}" valType="code"/>
+    <Param name="JS libs" updates="None" val="packaged" valType="str"/>
+    <Param name="Units" updates="None" val="use prefs" valType="str"/>
+    <Param name="Save excel file" updates="None" val="False" valType="bool"/>
+    <Param name="Enable Escape" updates="None" val="True" valType="bool"/>
+    <Param name="Save psydat file" updates="None" val="True" valType="bool"/>
+    <Param name="Window size (pixels)" updates="None" val="[1920, 1080]" valType="code"/>
+    <Param name="Full-screen window" updates="None" val="True" valType="bool"/>
+    <Param name="blendMode" updates="None" val="avg" valType="str"/>
+    <Param name="Use version" updates="None" val="" valType="str"/>
+    <Param name="HTML path" updates="None" val="html" valType="str"/>
+    <Param name="Save csv file" updates="None" val="True" valType="bool"/>
+    <Param name="OSF Project ID" updates="None" val="" valType="str"/>
+    <Param name="Save log file" updates="None" val="True" valType="bool"/>
+    <Param name="Save wide csv file" updates="None" val="True" valType="bool"/>
+    <Param name="Show mouse" updates="None" val="False" valType="bool"/>
+    <Param name="Data filename" updates="None" val="u'data/%s_%s_%s' % (expInfo['participant'], expName, expInfo['date'])" valType="code"/>
+    <Param name="Show info dlg" updates="None" val="True" valType="bool"/>
+    <Param name="expName" updates="None" val="Expt_DEF_calibration" valType="str"/>
+    <Param name="logging level" updates="None" val="exp" valType="code"/>
+    <Param name="Screen" updates="None" val="1" valType="num"/>
+  </Settings>
+  <Routines>
+    <Routine name="response_routine">
+      <CodeComponent name="reponse_trigger_code">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="reponse_trigger_code" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="trials.addData(&quot;discrim_resptime&quot;, globalClock.getTime() - startTime)&amp;#10;&amp;#10;resp_options = [['nV_V',['Nonliving_Things','Living_Things']],&amp;#10;                ['V_nV',['Living_Things','Nonliving_Things']]]&amp;#10;&amp;#10;idx = np.random.choice([0,1])&amp;#10;msg = '{}'.format(resp_options[idx][0])&amp;#10;&amp;#10;trials.addData(&quot;response_window&quot;, resp_options[idx][0])" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="temp_correctAns = np.where(np.array(resp_options[idx][1]) == category)[0][0]+1&amp;#10;&amp;#10;trials.addData('correctAns',temp_correctAns)&amp;#10;&amp;#10;# objective accuracy&amp;#10;&amp;#10;if (response.keys == str(temp_correctAns)) or (response.keys == temp_correctAns):&amp;#10;   temp_corr = 1&amp;#10;else:&amp;#10;    temp_corr = 0&amp;#10;&amp;#10;trials.addData('response.corr' , temp_corr)&amp;#10;" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+      <KeyboardComponent name="response">
+        <Param name="correctAns" updates="constant" val="$correctAns" valType="str"/>
+        <Param name="storeCorrect" updates="constant" val="False" valType="bool"/>
+        <Param name="name" updates="None" val="response" valType="code"/>
+        <Param name="stopVal" updates="constant" val="1.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="forceEndRoutine" updates="constant" val="False" valType="bool"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="discard previous" updates="constant" val="True" valType="bool"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="allowedKeys" updates="constant" val="'1','2'" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="store" updates="constant" val="last key" valType="str"/>
+        <Param name="syncScreenRefresh" updates="constant" val="True" valType="bool"/>
+      </KeyboardComponent>
+      <TextComponent name="tell_response">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="tell_response" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="set every repeat" val="$msg&amp;#10;&amp;#10;" valType="str"/>
+        <Param name="stopVal" updates="constant" val="1.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="frame N" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+    </Routine>
+    <Routine name="jitter_delay">
+      <CodeComponent name="pick_jitter_delay_duration">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="pick_jitter_delay_duration" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="jitter_dur_options = [1.5,2.0,2.5,3.0,3.5]&amp;#10;pick_chance = [0.5,0.25,0.1,0.1,0.05]&amp;#10;jitter_delay_dur = np.random.choice(jitter_dur_options,size=1,p=pick_chance)[0]&amp;#10;&amp;#10;trials.addData(&quot;jitter1&quot;, jitter_delay_dur)" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+      <TextComponent name="delay_post_mask">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="delay_post_mask" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="+" valType="str"/>
+        <Param name="stopVal" updates="constant" val="0.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="[0, 0]" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+    </Routine>
+    <Routine name="introduction">
+      <TextComponent name="text">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="text" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="Empezando" valType="str"/>
+        <Param name="stopVal" updates="constant" val="1" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <TextComponent name="text_2">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="text_2" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="+" valType="str"/>
+        <Param name="stopVal" updates="constant" val="2" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="[0, 0]" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="1" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+    </Routine>
+    <Routine name="visibility">
+      <KeyboardComponent name="visible">
+        <Param name="correctAns" updates="constant" val="1" valType="str"/>
+        <Param name="storeCorrect" updates="constant" val="True" valType="bool"/>
+        <Param name="name" updates="None" val="visible" valType="code"/>
+        <Param name="stopVal" updates="constant" val="1.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="forceEndRoutine" updates="constant" val="False" valType="bool"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="discard previous" updates="constant" val="True" valType="bool"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="allowedKeys" updates="constant" val="'1','2','3'" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="store" updates="constant" val="last key" valType="str"/>
+        <Param name="syncScreenRefresh" updates="constant" val="True" valType="bool"/>
+      </KeyboardComponent>
+      <TextComponent name="tell_visible">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="tell_visible" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="?" valType="str"/>
+        <Param name="stopVal" updates="constant" val="1.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <CodeComponent name="trigger_visibility">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="trigger_visibility" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="trials.addData(&quot;visibil_resptime&quot;, globalClock.getTime() - startTime)&amp;#10;" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+      <CodeComponent name="staircase">
+        <Param name="Begin Experiment" updates="constant" val="response_no_experience = []" valType="extendedCode"/>
+        <Param name="name" updates="None" val="staircase" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="&amp;#10;trials.addData('probeFrames',curr)&amp;#10;&amp;#10;count += 1&amp;#10;if visible.keys == '1':# invisible&amp;#10;        curr += np.random.choice([1,2,3],size=1)[0]&amp;#10;        if curr &lt; 1:  curr = 1&amp;#10;        response_no_experience.append(temp_corr)&amp;#10;elif visible.keys == '2':# partially aware&amp;#10;        curr -= 1&amp;#10;        if curr &lt; 1:  curr = 1 &amp;#10;elif visible.keys == '3': # visible&amp;#10;        curr -= np.random.choice([2,3],size=1,p=[0.5,0.5])[0]&amp;#10;        if curr &lt; 1: curr = 1&amp;#10;    &amp;#10;#elif visible.keys == '4': # fully visible&amp;#10;#        curr -= 3&amp;#10;#        if curr &lt; 1: curr = 1&amp;#10;" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="show_message">
+      <CodeComponent name="print_">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="print_" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="&amp;#10;meanacc = trials.data['response.corr'].mean()&amp;#10;meanvis = trials.data['visible.corr'].mean()&amp;#10;print_msg=&quot;{:.2f}, {}&quot;.format(&amp;#10;meanvis,curr,)&amp;#10;print(&quot;mean vis = {:.2f}, frames = {}, p(correct) = {:.2f}&quot;.format(&amp;#10;    meanvis,curr,meanacc,))&amp;#10;#msg = msg + '\nkey={},cor={}'.format(response.keys,str(temp_correctAns))&amp;#10;#msg WOULD BE TO DISPLAY IN A TXT OBJECT - THAT HAS BEEN DELETED" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+      <TextComponent name="text_3">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="text_3" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="set every repeat" val="$print_msg" valType="str"/>
+        <Param name="stopVal" updates="constant" val="2" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="[0, 0]" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+    </Routine>
+    <Routine name="premask">
+      <TextComponent name="fixation">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="fixation" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="+" valType="str"/>
+        <Param name="stopVal" updates="constant" val="0.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <TextComponent name="blank">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="blank" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="" valType="str"/>
+        <Param name="stopVal" updates="constant" val="0.5" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="condition" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="$fixation.status==FINISHED" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <GratingComponent name="premask_1">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="tex" updates="set every frame" val="$np.random.rand(n_square,n_square) * 2 -1" valType="str"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="premask_1" valType="code"/>
+        <Param name="color" updates="constant" val="$[1,1,1]" valType="str"/>
+        <Param name="stopVal" updates="constant" val="$premask_dur" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="mask" updates="constant" val="" valType="str"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="interpolate" updates="constant" val="nearest" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="pix" valType="str"/>
+        <Param name="texture resolution" updates="constant" val="128" valType="code"/>
+        <Param name="phase" updates="set every repeat" val="$np.random.uniform(0,1,2).round(1)" valType="code"/>
+        <Param name="startType" updates="None" val="condition" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (frames)" valType="str"/>
+        <Param name="startVal" updates="None" val="$blank.status == FINISHED" valType="code"/>
+        <Param name="sf" updates="constant" val="None" valType="code"/>
+        <Param name="size" updates="constant" val="$(image_size, image_size)" valType="code"/>
+      </GratingComponent>
+    </Routine>
+    <Routine name="probe_routine">
+      <CodeComponent name="code">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="code" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="trials.addData(&quot;image_onset_time&quot;, globalClock.getTime() - startTime)&amp;#10;" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+      <ImageComponent name="probe">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="flipVert" updates="constant" val="False" valType="bool"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="flipHoriz" updates="constant" val="False" valType="bool"/>
+        <Param name="name" updates="None" val="probe" valType="code"/>
+        <Param name="color" updates="constant" val="$[1,1,1]" valType="str"/>
+        <Param name="stopVal" updates="constant" val="$curr" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="mask" updates="constant" val="None" valType="str"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="interpolate" updates="constant" val="linear" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="pix" valType="str"/>
+        <Param name="texture resolution" updates="constant" val="128" valType="code"/>
+        <Param name="startType" updates="None" val="frame N" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (frames)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="image" updates="set every repeat" val="$probe_path" valType="str"/>
+        <Param name="size" updates="constant" val="$(image_size, image_size)" valType="code"/>
+      </ImageComponent>
+    </Routine>
+    <Routine name="End_experiment">
+      <TextComponent name="The_End">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="The_End" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="" valType="str"/>
+        <Param name="stopVal" updates="constant" val="3" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <CodeComponent name="code_2">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="code_2" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="print(globalClock.getTime() - startTime)&amp;#10;print(&quot;mean vis = {:.2f}, frames = {}, p(correct) = {:.2f}&quot;.format(&amp;#10;    meanvis,curr,meanacc,))&amp;#10;print('performance vis = 1 is {:.2f}'.format(np.mean(response_no_experience)))" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="setupTRIGetc">
+      <CodeComponent name="setup_vbles_trigger">
+        <Param name="Begin Experiment" updates="constant" val="curr=int(expInfo['probeFrames'])&amp;#10;count=0&amp;#10;&amp;#10;n_total = 96&amp;#10;premask_dur = int(expInfo['premask_dur'])&amp;#10;postmask_dur = int(expInfo['postmask_dur'])&amp;#10;n_square = int(expInfo['n_square'])&amp;#10;image_size = int(expInfo['image_size'])&amp;#10;&amp;#10;" valType="extendedCode"/>
+        <Param name="name" updates="None" val="setup_vbles_trigger" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="&amp;#10;globalClock.reset()&amp;#10;startTime = globalClock.getTime() " valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="postmask">
+      <GratingComponent name="postmask_1">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="tex" updates="set every frame" val="$np.random.rand(n_square,n_square) * 2 -1" valType="str"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="postmask_1" valType="code"/>
+        <Param name="color" updates="constant" val="$[1,1,1]" valType="str"/>
+        <Param name="stopVal" updates="constant" val="$postmask_dur" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="mask" updates="constant" val="" valType="str"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="interpolate" updates="constant" val="nearest" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="pix" valType="str"/>
+        <Param name="texture resolution" updates="constant" val="128" valType="code"/>
+        <Param name="phase" updates="set every repeat" val="$np.random.uniform(0,1,2).round(1)" valType="code"/>
+        <Param name="startType" updates="None" val="frame N" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (frames)" valType="str"/>
+        <Param name="startVal" updates="None" val="0" valType="code"/>
+        <Param name="sf" updates="constant" val="None" valType="code"/>
+        <Param name="size" updates="constant" val="$(image_size, image_size)" valType="code"/>
+      </GratingComponent>
+    </Routine>
+    <Routine name="post_trial_jitter">
+      <TextComponent name="post_fixation">
+        <Param name="opacity" updates="constant" val="1" valType="code"/>
+        <Param name="colorSpace" updates="constant" val="rgb" valType="str"/>
+        <Param name="name" updates="None" val="post_fixation" valType="code"/>
+        <Param name="wrapWidth" updates="constant" val="" valType="code"/>
+        <Param name="color" updates="constant" val="white" valType="str"/>
+        <Param name="text" updates="constant" val="+" valType="str"/>
+        <Param name="stopVal" updates="constant" val="1" valType="code"/>
+        <Param name="durationEstim" updates="None" val="" valType="code"/>
+        <Param name="pos" updates="constant" val="(0, 0)" valType="code"/>
+        <Param name="flip" updates="constant" val="" valType="str"/>
+        <Param name="startEstim" updates="None" val="" valType="code"/>
+        <Param name="units" updates="None" val="from exp settings" valType="str"/>
+        <Param name="startType" updates="None" val="time (s)" valType="str"/>
+        <Param name="ori" updates="constant" val="0" valType="code"/>
+        <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
+        <Param name="startVal" updates="None" val="0.0" valType="code"/>
+        <Param name="font" updates="constant" val="Arial" valType="str"/>
+        <Param name="letterHeight" updates="constant" val="0.1" valType="code"/>
+      </TextComponent>
+      <CodeComponent name="pick_post_fixation_duration">
+        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="name" updates="None" val="pick_post_fixation_duration" valType="code"/>
+        <Param name="Begin Routine" updates="constant" val="jitter_dur_options = [6.0,6.5,7.0,7.5,8.0]&amp;#10;pick_chance = [0.5,0.25,0.1,0.1,0.05]&amp;#10;post_trial_jitter_duration = np.random.choice(jitter_dur_options,size=1,p=pick_chance)[0]&amp;#10;&amp;#10;&amp;#10;trials.addData(&quot;jitter2&quot;, post_trial_jitter_duration)" valType="extendedCode"/>
+        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
+      </CodeComponent>
+    </Routine>
+  </Routines>
+  <Flow>
+    <Routine name="setupTRIGetc"/>
+    <Routine name="introduction"/>
+    <LoopInitiator loopType="TrialHandler" name="trials">
+      <Param name="conditionsFile" updates="None" val="csvs/calibration.csv" valType="str"/>
+      <Param name="name" updates="None" val="trials" valType="code"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+      <Param name="loopType" updates="None" val="random" valType="str"/>
+      <Param name="nReps" updates="None" val="1" valType="code"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="conditions" updates="None" val="[{u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/Chest-of-drawers_10.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'Chest-of-drawers'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/armadillo_3.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'armadillo'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/armchair_2.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'armchair'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Tools/axe_8.jpg', u'subcategory': u'Tools', u'fixation_duration': 0, u'label': u'axe'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/barn-owl_6.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'barn-owl'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/bed_11.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'bed'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/bedside-table_16.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'bedside-table'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/boat_4.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'boat'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/bookcase_24.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'bookcase'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/bus_2.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'bus'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Insects/butterfly_5.jpg', u'subcategory': u'Insects', u'fixation_duration': 0, u'label': u'butterfly'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/car_22.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'car'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/castle_19.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'castle'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/cat_12.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'cat'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/cathedral_15.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'cathedral'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/chair_24.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'chair'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/cheetah_10.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'cheetah'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/church_6.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'church'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/coking-pot_1.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'coking-pot'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/couch_12.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'couch'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/cow_15.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'cow'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/crab_16.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'crab'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/cup_16.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'cup'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/dolphin_26.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'dolphin'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Insects/dragonfly_26.jpg', u'subcategory': u'Insects', u'fixation_duration': 0, u'label': u'dragonfly'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/drum_20.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'drum'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/duck_19.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'duck'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/elephant_15.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'elephant'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/factory_0.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'factory'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/filling-cabinet_17.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'filling-cabinet'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/fondue_0.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'fondue'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/frying-pan_20.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'frying-pan'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/giraffe_16.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'giraffe'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/goldfinch_22.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'goldfinch'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/goose_14.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'goose'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/granary_25.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'granary'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/guitar_11.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'guitar'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Tools/hammer_11.jpg', u'subcategory': u'Tools', u'fixation_duration': 0, u'label': u'hammer'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/hen_25.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'hen'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/hippopotamus_19.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'hippopotamus'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/horse_25.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'horse'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/house_23.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'house'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/hummingbird_15.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'hummingbird'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/killer-whale_8.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'killer-whale'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/kiwi_19.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'kiwi'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Insects/ladybird_26.jpg', u'subcategory': u'Insects', u'fixation_duration': 0, u'label': u'ladybird'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/lamp_2.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'lamp'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/lectern_0.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'lectern'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/lioness_5.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'lioness'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/lobster_8.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'lobster'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/lynx_7.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'lynx'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/magpie_15.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'magpie'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/manatee_5.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'manatee'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/mill_12.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'mill'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/motorbike_15.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'motorbike'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/narwhal_17.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'narwhal'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/ostrich_25.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'ostrich'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/owl_5.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'owl'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Buildings/palace_3.jpg', u'subcategory': u'Buildings', u'fixation_duration': 0, u'label': u'palace'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/partridge_24.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'partridge'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/pelican_3.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'pelican'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/penguin_19.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'penguin'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/piano__20.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'piano'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/pigeon_25.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'pigeon'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/plane_4.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'plane'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/pomfret_24.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'pomfret'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/pot_8.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'pot'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/raven_7.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'raven'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/rhino_10.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'rhino'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/rocking-chair_14.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'rocking-chair'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/rooster_8.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'rooster'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/saucepan_26.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'saucepan'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/saxophone_12.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'saxophone'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Insects/scorpion_5.jpg', u'subcategory': u'Insects', u'fixation_duration': 0, u'label': u'scorpion'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/seagull_15.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'seagull'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/shark_4.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'shark'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/ship_3.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'ship'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/small-saucepan_17.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'small-saucepan'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/sofa_0.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'sofa'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/sparrow_19.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'sparrow'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/sperm-whale_1.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'sperm-whale'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/table_2.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'table'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/tapir_25.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'tapir'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Kitchen_Uten/teapot_22.jpg', u'subcategory': u'Kitchen_Uten', u'fixation_duration': 0, u'label': u'teapot'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/tiger_26.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'tiger'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Birds/toucan_14.jpg', u'subcategory': u'Birds', u'fixation_duration': 0, u'label': u'toucan'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/tractor_6.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'tractor'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/train_22.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'train'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/trumpet_21.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'trumpet'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/tuba_7.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'tuba'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/turtle_13.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'turtle'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Vehicles/van_1.jpg', u'subcategory': u'Vehicles', u'fixation_duration': 0, u'label': u'van'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Musical_Inst/violin_23.jpg', u'subcategory': u'Musical_Inst', u'fixation_duration': 0, u'label': u'violin'}, {u'category': u'Nonliving_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Nonliving_Things/Furniture/wardrobe_15.jpg', u'subcategory': u'Furniture', u'fixation_duration': 0, u'label': u'wardrobe'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Marine_creatures/whale_25.jpg', u'subcategory': u'Marine_creatures', u'fixation_duration': 0, u'label': u'whale'}, {u'category': u'Living_Things', u'probe_path': u'../experiment_stimuli/bw_bc_bl/Living_Things/Animals/zebra_21.jpg', u'subcategory': u'Animals', u'fixation_duration': 0, u'label': u'zebra'}]" valType="str"/>
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+    </LoopInitiator>
+    <Routine name="premask"/>
+    <Routine name="probe_routine"/>
+    <Routine name="postmask"/>
+    <Routine name="jitter_delay"/>
+    <Routine name="response_routine"/>
+    <Routine name="visibility"/>
+    <Routine name="post_trial_jitter"/>
+    <Routine name="show_message"/>
+    <LoopTerminator name="trials"/>
+    <Routine name="End_experiment"/>
+  </Flow>
+</PsychoPy2experiment>
