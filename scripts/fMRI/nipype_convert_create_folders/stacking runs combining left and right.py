@@ -28,12 +28,14 @@ from utils              import groupby_average,load_csv
 
 sub         = 'sub-07'
 folder_name = ''
-target_folder_name = 'BOLD_average_lr'
-main_dir = '/bcbl/home/home_n-z/nmei/MRI/uncon_feat/MRI/'
+target_folder_name = 'detrend_all_zscore_some'
+main_dir    = '/bcbl/home/home_n-z/nmei/MRI/uncon_feat/MRI/'
 parent_dir  = '{}{}/func/'.format(main_dir,sub)
 mask_dir    = '{}{}/anat/ROI_BOLD'.format(main_dir,sub)
 BOLD_mask   = glob('{}{}/func/*/*/*/*/mask.nii.gz'.format(main_dir,sub))[0]
 masks       = glob(os.path.join(mask_dir,'*.nii.gz'))
+# 1: pick volumes -> signal_clearn; 2: signal_clean -> pick volumes; 3: separately
+method      = 3
 
 processed   = glob(os.path.join(parent_dir,
                                 '*',
@@ -90,15 +92,38 @@ for average in [True]:
             BOLD        = masker.fit_transform(X        = item)
             
             df_concat   = load_csv(csv)
-            
+            # clean_signal works on ndarray only
             idx             = df_concat['volume_interest'] == 1
-            processed_BOLD  = BOLD[idx]
-            processed_df    = df_concat[idx]
-            # preprocessing is applied on the picked volumes
-            processed_BOLD  = clean_signal(processed_BOLD,
-                                           t_r          = 0.85,
-                                           detrend      = True,
-                                           standardize  = True)
+            if method == 1:
+                processed_BOLD  = BOLD[idx]
+                processed_df    = df_concat[idx]
+                # preprocessing is applied on the picked volumes
+                processed_BOLD  = clean_signal(processed_BOLD,
+                                               t_r          = 0.85,
+                                               detrend      = True,
+                                               standardize  = True)
+            elif method == 2:
+                # preprocessing is applied on the all volumes
+                processed_BOLD  = clean_signal(BOLD,
+                                               t_r          = 0.85,
+                                               detrend      = True,
+                                               standardize  = True)
+                processed_BOLD  = processed_BOLD[idx]
+                processed_df    = df_concat[idx]
+            elif method == 3:
+                # detrending is applied on the all volumes
+                processed_BOLD  = clean_signal(BOLD,
+                                               t_r          = 0.85,
+                                               detrend      = True,
+                                               standardize  = False)
+                # pick the volumes between 4 - 7 seconds
+                processed_BOLD  = processed_BOLD[idx]
+                processed_df    = df_concat[idx]
+                # zscroing is applied on the picked volumes
+                processed_BOLD  = clean_signal(processed_BOLD,
+                                               t_r          = None,
+                                               detrend      = False,
+                                               standardize  = True,)
             
             if average:
                 processed_BOLD,processed_df = groupby_average(
