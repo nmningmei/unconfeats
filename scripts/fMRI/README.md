@@ -1,7 +1,7 @@
 # fMRI data analysis
 
 ## Signal processing from scanner
-0. `[0.preprocess fmri.py](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/0.preprocess%20fmri.py)` is used for removing motion noise and smoothing for each run.
+0. `[0.preprocess fmri.py]`(https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/0.preprocess%20fmri.py) is used for removing motion noise and smoothing for each run.
 1. And then we use`[1.ICA_AROMA.py](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/1.ICA_AROMA.py)` to apply ICA AROMA to further denoising.
 2. In parallel, we use `[2.freesurfer reconall.py](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/2.freesurfer%20reconall.py)` to generate the brain model using Freesurfer.
 3. And then we apply highpass filer to the preprocessed runs using `[4.highpass filter.py](4.highpass filter.py)`.
