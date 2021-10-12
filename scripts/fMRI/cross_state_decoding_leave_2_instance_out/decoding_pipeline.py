@@ -40,15 +40,12 @@ from joblib                  import Parallel,delayed
 from collections             import OrderedDict
 
 # interchangable part:
-sub                     = 'sub-05'
-conscious_state_source  = 'conscious'
-conscious_state_target  = 'unconscious'
+sub                     = 'sub-05' # change for subject
+conscious_state_source  = 'conscious' # change for consciousness state
+conscious_state_target  = 'unconscious' # change for consciousness state
 
+# folder name allows us to control for batch processing in HPC
 folder_name             = 'decoding_LOOC_10' # decoding_LOO_balanced,decoding_stratified
-if 'glimpse' in folder_name:
-    add_glimpse         = True
-else:
-    add_glimpse         = False
 
 stacked_data_dir        = '../../../../data/BOLD_average_BOLD_average_lr/{}/'.format(sub)
 output_dir              = '../../../../results/MRI/nilearn/{}/{}'.format(folder_name,sub)
@@ -56,7 +53,6 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 BOLD_data               = np.sort(glob(os.path.join(stacked_data_dir,'*BOLD.npy')))
 event_data              = np.sort(glob(os.path.join(stacked_data_dir,'*.csv')))
-
 
 model_names             = [
         'None + Linear-SVM',
@@ -178,9 +174,6 @@ for BOLD_name,df_name in zip(BOLD_data,event_data):
         idx_glimpse_target  = df_event['visibility'] == 'glimpse'
         _data_target        = BOLD[idx_glimpse_target]
         data_target         = np.concatenate([data_target,_data_target])
-#    if conscious_state_source != conscious_state_target:
-#        data_source = np.concatenate([data_source,data_target])
-#        targets_source = np.concatenate([targets_source,targets_target])
     
     for model_name in model_names:
         file_name           = f'{sub}_{roi_name}_{conscious_state_source}_{conscious_state_target}_{model_name}.csv'.replace(' + ','_')
@@ -195,8 +188,6 @@ for BOLD_name,df_name in zip(BOLD_data,event_data):
                                                      remove_invariant  = True,
                                                      l1                = True,
                                                      C                 = C,
-#                                                     class_weight      = class_weight,
-#                                                     tol               = 1e-3,
                                                      )[model_name]
             
             with warnings.catch_warnings():
