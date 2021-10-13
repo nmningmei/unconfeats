@@ -65,7 +65,10 @@ from collections                                   import OrderedDict
 
 from scipy                                         import stats
 from collections                                   import Counter
-from mpl_toolkits.axes_grid1                       import make_axes_locatable
+try:
+    from mpl_toolkits.axes_grid1                       import make_axes_locatable
+except:
+    print('what?')
 from matplotlib                                    import pyplot as plt
 from matplotlib.pyplot                             import cm
 from nilearn.plotting.img_plotting                 import (_load_anat,
@@ -2454,36 +2457,38 @@ def load_csv(f,print_ = False,sub = None):
         df['sub'] = sub
     return df
 
-def build_model_dictionary(print_train = False,
-                           class_weight = 'balanced',
+def build_model_dictionary(model_name,
+                           print_train      = False,
+                           class_weight     = 'balanced',
                            remove_invariant = True,
-                           l1 = False,
-                           n_jobs = 1,
-                           C = 1,
-                           tol = 1e-2,
+                           scaler           = None,
+                           l1               = False,
+                           n_jobs           = 1,
+                           C                = 1,
+                           tol              = 1e-2,
                            ):
     np.random.seed(12345)
     if l1:
-        svm = LinearSVC(penalty = 'l1', # not default
-                        dual = False, # not default
-                        tol = tol, # not default
-                        random_state = 12345, # not default
-                        max_iter = int(1e4), # default
-                        class_weight = class_weight, # not default
-                        C = C,
+        svm = LinearSVC(penalty                                 = 'l1', # not default
+                        dual                                    = False, # not default
+                        tol                                     = tol, # not default
+                        random_state                            = 12345, # not default
+                        max_iter                                = int(1e4), # default
+                        class_weight                            = class_weight, # not default
+                        C                                       = C,
                         )
     else:
-        svm = LinearSVC(penalty = 'l2', # default
-                        dual = True, # default
-                        tol = tol, # not default
-                        random_state = 12345, # not default
-                        max_iter = int(1e4), # default
-                        class_weight = class_weight, # not default
-                        C = C,
+        svm = LinearSVC(penalty                                 = 'l2', # default
+                        dual                                    = True, # default
+                        tol                                     = tol, # not default
+                        random_state                            = 12345, # not default
+                        max_iter                                = int(1e4), # default
+                        class_weight                            = class_weight, # not default
+                        C                                       = C,
                         )
-    svm = CalibratedClassifierCV(base_estimator = svm,
-                                 method = 'sigmoid',
-                                 cv = 8)
+    svm = CalibratedClassifierCV(base_estimator                 = svm,
+                                 method                         = 'sigmoid',
+                                 cv                             = 8)
     xgb = XGBClassifier(
                         learning_rate                           = 1e-3, # not default
                         max_depth                               = 10, # not default
@@ -2510,129 +2515,43 @@ def build_model_dictionary(print_train = False,
                         prefit                                  = False,
                         threshold                               = 'median' # induce sparsity
                         )
-    uni = SelectPercentile(mutual_info_classif,50) # so annoying that I cannot control the random state
+    uni = SelectPercentile(score_func                           = mutual_info_classif,
+                           percentile                           = 50,
+                           ) # so annoying that I cannot control the random state
     knn = KNeighborsClassifier()
-    tree = DecisionTreeClassifier(random_state = 12345,
-                                  class_weight = class_weight)
-    dummy = DummyClassifier(strategy = 'uniform',random_state = 12345,)
+    tree = DecisionTreeClassifier(random_state                  = 12345,
+                                  class_weight                  = class_weight)
+    dummy = DummyClassifier(strategy = 'uniform',random_state   = 12345,)
+    
+    pipeline = []
+    
     if remove_invariant:
-        RI = VarianceThreshold()
-        models = OrderedDict([
-                ['None + Dummy',                     make_pipeline(RI,MinMaxScaler(),
-                                                                   dummy,)],
-                ['None + Linear-SVM',                make_pipeline(RI,MinMaxScaler(),
-                                                                  svm,)],
-                ['None + Ensemble-SVMs',             make_pipeline(RI,MinMaxScaler(),
-                                                                  bagging,)],
-                ['None + KNN',                       make_pipeline(RI,MinMaxScaler(),
-                                                                  knn,)],
-                ['None + Tree',                      make_pipeline(RI,MinMaxScaler(),
-                                                                  tree,)],
-                ['PCA + Dummy',                      make_pipeline(RI,MinMaxScaler(),
-                                                                   PCA(),
-                                                                   dummy,)],
-                ['PCA + Linear-SVM',                 make_pipeline(RI,MinMaxScaler(),
-                                                                  PCA(),
-                                                                  svm,)],
-                ['PCA + Ensemble-SVMs',              make_pipeline(RI,MinMaxScaler(),
-                                                                  PCA(),
-                                                                  bagging,)],
-                ['PCA + KNN',                        make_pipeline(RI,MinMaxScaler(),
-                                                                  PCA(),
-                                                                  knn,)],
-                ['PCA + Tree',                       make_pipeline(RI,MinMaxScaler(),
-                                                                  PCA(),
-                                                                  tree,)],
-                ['Mutual + Dummy',                   make_pipeline(RI,MinMaxScaler(),
-                                                                   uni,
-                                                                   dummy,)],
-                ['Mutual + Linear-SVM',              make_pipeline(RI,MinMaxScaler(),
-                                                                  uni,
-                                                                  svm,)],
-                ['Mutual + Ensemble-SVMs',           make_pipeline(RI,MinMaxScaler(),
-                                                                  uni,
-                                                                  bagging,)],
-                ['Mutual + KNN',                     make_pipeline(RI,MinMaxScaler(),
-                                                                  uni,
-                                                                  knn,)],
-                ['Mutual + Tree',                    make_pipeline(RI,MinMaxScaler(),
-                                                                  uni,
-                                                                  tree,)],
-                ['RandomForest + Dummy',             make_pipeline(RI,MinMaxScaler(),
-                                                                   RF,
-                                                                   dummy,)],
-                ['RandomForest + Linear-SVM',        make_pipeline(RI,MinMaxScaler(),
-                                                                  RF,
-                                                                  svm,)],
-                ['RandomForest + Ensemble-SVMs',     make_pipeline(RI,MinMaxScaler(),
-                                                                  RF,
-                                                                  bagging,)],
-                ['RandomForest + KNN',               make_pipeline(RI,MinMaxScaler(),
-                                                                  RF,
-                                                                  knn,)],
-                ['RandomForest + Tree',              make_pipeline(RI,MinMaxScaler(),
-                                                                  RF,
-                                                                  tree,)],]
-                )
-    else:
-        models = OrderedDict([
-                ['None + Dummy',                     make_pipeline(MinMaxScaler(),
-                                                                   dummy,)],
-                ['None + Linear-SVM',                make_pipeline(MinMaxScaler(),
-                                                                  svm,)],
-                ['None + Ensemble-SVMs',             make_pipeline(MinMaxScaler(),
-                                                                  bagging,)],
-                ['None + KNN',                       make_pipeline(MinMaxScaler(),
-                                                                  knn,)],
-                ['None + Tree',                      make_pipeline(MinMaxScaler(),
-                                                                  tree,)],
-                ['PCA + Dummy',                      make_pipeline(MinMaxScaler(),
-                                                                   PCA(),
-                                                                   dummy,)],
-                ['PCA + Linear-SVM',                 make_pipeline(MinMaxScaler(),
-                                                                  PCA(),
-                                                                  svm,)],
-                ['PCA + Ensemble-SVMs',              make_pipeline(MinMaxScaler(),
-                                                                  PCA(),
-                                                                  bagging,)],
-                ['PCA + KNN',                        make_pipeline(MinMaxScaler(),
-                                                                  PCA(),
-                                                                  knn,)],
-                ['PCA + Tree',                       make_pipeline(MinMaxScaler(),
-                                                                  PCA(),
-                                                                  tree,)],
-                ['Mutual + Dummy',                   make_pipeline(MinMaxScaler(),
-                                                                   uni,
-                                                                   dummy,)],
-                ['Mutual + Linear-SVM',              make_pipeline(MinMaxScaler(),
-                                                                  uni,
-                                                                  svm,)],
-                ['Mutual + Ensemble-SVMs',           make_pipeline(MinMaxScaler(),
-                                                                  uni,
-                                                                  bagging,)],
-                ['Mutual + KNN',                     make_pipeline(MinMaxScaler(),
-                                                                  uni,
-                                                                  knn,)],
-                ['Mutual + Tree',                    make_pipeline(MinMaxScaler(),
-                                                                  uni,
-                                                                  tree,)],
-                ['RandomForest + Dummy',             make_pipeline(MinMaxScaler(),
-                                                                   RF,
-                                                                   dummy,)],
-                ['RandomForest + Linear-SVM',        make_pipeline(MinMaxScaler(),
-                                                                  RF,
-                                                                  svm,)],
-                ['RandomForest + Ensemble-SVMs',     make_pipeline(MinMaxScaler(),
-                                                                  RF,
-                                                                  bagging,)],
-                ['RandomForest + KNN',               make_pipeline(MinMaxScaler(),
-                                                                  RF,
-                                                                  knn,)],
-                ['RandomForest + Tree',              make_pipeline(MinMaxScaler(),
-                                                                  RF,
-                                                                  tree,)],]
-                )
-    return models
+        pipeline.append(VarianceThreshold())
+    
+    if scaler is not None:
+        pipeline.append(scaler)
+    
+    feature_extractor, decoder = model_name.split(' + ')
+    
+    if feature_extractor == 'PCA':
+        pipeline.append(PCA())
+    elif feature_extractor == 'Mutual':
+        pipeline.append(uni)
+    elif feature_extractor == 'RandomForest':
+        pipeline.append(RF)
+    
+    if decoder == 'Linear-SVM':
+        pipeline.append(svm)
+    elif decoder == 'Dummy':
+        pipeline.append(dummy)
+    elif decoder == 'KNN':
+        pipeline.append(knn)
+    elif decoder == 'Tree':
+        pipeline.append(tree)
+    elif decoder == 'Bagging':
+        pipeline.append(bagging)
+    
+    return make_pipeline(*pipeline)
 
 def get_blocks(df__,label_map,):
     ids = df__['id'].values
@@ -3570,7 +3489,6 @@ def load_BOLD_csv_preprocessing(BOLD_file_name,csv_file_name,conscious_state,
     
     from sklearn import cluster
     from sklearn.feature_selection import VarianceThreshold
-    from sklearn.preprocessing import MinMaxScaler
     
     BOLD             = np.load(BOLD_file_name)
     event            = pd.read_csv(csv_file_name)

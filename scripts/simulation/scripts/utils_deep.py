@@ -1,74 +1,53 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb  7 10:54:54 2020
+Created on Tue Nov 17 16:02:43 2020
+
 @author: nmei
 """
 
+import os,gc
 
-import os
-from glob import glob
-from collections import OrderedDict
-import pandas as pd
 import numpy as np
 
 import torch
-from torch import nn,no_grad
-from torch.utils import data
-from torch.nn import functional as F
-import torch.optim as optim
 from torch.autograd import Variable
+from torch.utils.data import Dataset,DataLoader,TensorDataset
+from torch import nn
+from torchvision import models,transforms
 
-from torchvision.datasets import ImageFolder
-from torchvision import transforms
-import torchvision.models as Tmodels
+from PIL  import Image
+from tqdm import tqdm
+from sklearn.model_selection import train_test_split
+from sklearn.metrics         import roc_auc_score
+from sklearn.utils           import shuffle as sk_shuffle
+from sklearn.preprocessing   import MinMaxScaler
 
-from sklearn import metrics
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC,SVC
-from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline
-from sklearn.model_selection import StratifiedShuffleSplit,cross_validate,permutation_test_score
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.linear_model import LogisticRegression
-from sklearn.utils import shuffle as sk_shuffle
 
-try:
-    from xgboost import XGBClassifier
-except:
-    pass
-output_act_func_dict = {'softmax':F.softmax, # softmax dim = 1
-                        'sigmoid':torch.sigmoid,
-                        'hinge':torch.nn.HingeEmbeddingLoss}
-probability_func_dict = {'softmax':F.softmax,    # softmax dim = 1
-                         'sigmoid':torch.sigmoid}
-softmax_dim = 1
 
-#candidate models
-def candidates(model_name,pretrained = True,):
+def candidate_pretrained_CNNs(model_name = 'alexnet',pretrained = True):
     picked_models = dict(
-            resnet18        = Tmodels.resnet18(pretrained           = pretrained,
+            resnet18        = models.resnet18(pretrained            = pretrained,
                                               progress              = False,),
-            alexnet         = Tmodels.alexnet(pretrained            = pretrained,
+            alexnet         = models.alexnet(pretrained             = pretrained,
                                              progress               = False,),
-            # squeezenet      = Tmodels.squeezenet1_1(pretrained      = pretrained,
-            #                                        progress         = False,),
-            vgg19_bn        = Tmodels.vgg19_bn(pretrained           = pretrained,
+            squeezenet      = models.squeezenet1_1(pretrained       = pretrained,
+                                                   progress         = False,),
+            vgg19_bn        = models.vgg19_bn(pretrained            = pretrained,
                                               progress              = False,),
-            densenet169     = Tmodels.densenet169(pretrained        = pretrained,
+            densenet169     = models.densenet169(pretrained         = pretrained,
                                                  progress           = False,),
-            inception       = Tmodels.inception_v3(pretrained       = pretrained,
+            inception       = models.inception_v3(pretrained        = pretrained,
                                                   progress          = False,),
-            # googlenet       = Tmodels.googlenet(pretrained          = pretrained,
-            #                                    progress             = False,),
-            # shufflenet      = Tmodels.shufflenet_v2_x0_5(pretrained = pretrained,
-            #                                             progress    = False,),
-            mobilenet       = Tmodels.mobilenet_v2(pretrained       = pretrained,
+            googlenet       = models.googlenet(pretrained           = pretrained,
+                                               progress             = False,),
+            shufflenet      = models.shufflenet_v2_x0_5(pretrained  = pretrained,
+                                                        progress    = False,),
+            mobilenet       = models.mobilenet_v2(pretrained        = pretrained,
                                                   progress          = False,),
-            # resnext50_32x4d = Tmodels.resnext50_32x4d(pretrained    = pretrained,
-            #                                          progress       = False,),
-            resnet50        = Tmodels.resnet50(pretrained           = pretrained,
+            resnext50_32x4d = models.resnext50_32x4d(pretrained     = pretrained,
+                                                     progress       = False,),
+            resnet50        = models.resnet50(pretrained            = pretrained,
                                               progress              = False,),
             )
     return picked_models[model_name]
@@ -77,7 +56,7 @@ def define_type(model_name):
     model_type          = dict(
             alexnet     = 'simple',
             vgg19_bn    = 'simple',
-            densenet169 = 'simple',
+            densenet    = 'simple',
             inception   = 'inception',
             mobilenet   = 'simple',
             resnet18    = 'resnet',
@@ -85,1204 +64,1483 @@ def define_type(model_name):
             )
     return model_type[model_name]
 
-def hidden_activation_functions(activation_func_name):
-    funcs = dict(relu = nn.ReLU(),
-                 selu = nn.SELU(),
-                 elu = nn.ELU(),
-                 sigmoid = nn.Sigmoid(),
-                 tanh = nn.Tanh(),
-                 linear = None,
-                 )
-    return funcs[activation_func_name]
-
-def _cut_bins(x,n_noise_levels = 50):
-    _,bins          = pd.cut(np.arange(n_noise_levels),2,retbins = True)
-    if bins[0] <= x < bins[1]:
-        return 'low'
-    # elif bins[1] <= x < bins[2]:
-    #     return 'medium'
-    else:
-        return 'high'
-
-def output_activation_functions(activation_func_name):
-    funcs = dict(softmax = F.log_softmax,
-                 sigmoid = F.logsigmoid,
-                 )
-    return funcs[activation_func_name]
-
-def define_augmentations(image_resize = 128,noise_level = None):
-    augmentations = {
-        'train':simple_augmentations(image_resize,noise_level),
-        'valid':simple_augmentations(image_resize,noise_level),
-    }
-    return augmentations
-
-def noise_fuc(x,noise_level = 1):
-    """
-    add guassian noise to the images during agumentation procedures
-
-    Inputs
-    --------------------
-    x: torch.tensor, batch_size x 3 x height x width
-    noise_level: float, standard deviation of the gaussian distribution
-    """
-    generator = torch.distributions.normal.Normal(0,noise_level)
-    return x + generator.sample(x.shape)
-
-def simple_augmentations(image_resize = 128,noise_level = None):
-    if noise_level is not None:
-        return transforms.Compose([
-    transforms.Resize((image_resize,image_resize)),
-    transforms.RandomHorizontalFlip(p = 0.5),
-    transforms.RandomRotation(45,),
-    transforms.RandomVerticalFlip(p = 0.5,),
-    transforms.ToTensor(),
-    transforms.Lambda(lambda x:noise_fuc(x,noise_level)),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-    else:
-        return transforms.Compose([
-    transforms.Resize((image_resize,image_resize)),
-    transforms.RandomHorizontalFlip(p = 0.5),
-    transforms.RandomRotation(45,),
-    transforms.RandomVerticalFlip(p = 0.5,),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-class customizedDataset(ImageFolder):
-    def __getitem__(self, idx):
-        original_tuple  = super(customizedDataset,self).__getitem__(idx)
-        path = self.imgs[idx][0]
-        tuple_with_path = (original_tuple +  (path,))
-        return tuple_with_path
-
-def freeze_layer_weights(layer):
-    for param in layer.parameters():
-        param.requries_grad = False
-
-def data_loader(data_root:str,
-                augmentations:transforms    = None,
-                batch_size:int              = 8,
-                num_workers:int             = 2,
-                shuffle:bool                = True,
-                return_path:bool            = False,
-                )->data.DataLoader:
-    """
-    Create a batch data loader from a given image folder.
-    The folder must be organized as follows:
-        main ---
-             |
-             -----class 1 ---
-                         |
-                         ----- image 1.jpeg
-                         .
-                         .
-                         .
-            |
-            -----class 2 ---
-                        |
-                        ---- image 1.jpeg
-                        .
-                        .
-                        .
-            |
-            -----class 3 ---
-                        |
-                        ---- image 1.jpeg
-                        .
-                        .
-                        .
-    Input
-    --------------------------
-    data_root: str, the main folder
-    augmentations: torchvision.transformers.Compose, steps of augmentation
-    batch_size: int, batch size
-    num_workers: int, CPU --> GPU carrier, number of CPUs
-    shuffle: Boolean, whether to shuffle the order
-    return_pth: Boolean, lod the image paths
-
-    Output
-    --------------------------
-    loader: DataLoader, a Pytorch dataloader object
-    """
-    if return_path:
-        datasets = customizedDataset(
-                root                        = data_root,
-                transform                   = augmentations
-                )
-    else:
-        datasets    = ImageFolder(
-                root                        = data_root,
-                transform                   = augmentations
-                )
-    loader      = data.DataLoader(
-                datasets,
-                batch_size                  = batch_size,
-                num_workers                 = num_workers,
-                shuffle                     = shuffle,
-                )
-    return loader
-
-class easy_model(nn.Module):
-    """
-    Models are not created equally
-    Some pretrained models are composed by a {feature} and a {classifier} component
-    thus, they are very easy to modify and transfer learning
-
-    Inputs
-    --------------------
-    pretrain_model: nn.Module, pretrained model object
-    hidden_units: int, hidden layer units
-    hidden_activation: nn.Module, activation layer
-    hidden_dropout: float (0,1), dropout rate
-    output_units: int, output layer units
-
-    Outputs
-    --------------------
-    model: nn.Module, a modified model with new {classifier} component with
-    {feature} frozen untrainable <-- this is done prior to feed to this function
-    """
+class CustomImageLoader(Dataset):
     def __init__(self,
-                 pretrain_model,
-                 hidden_units,
-                 hidden_activation,
-                 hidden_dropout,
-                 output_units,
-                 in_shape = (1,3,128,128),
+                 df_data,
+                 data, # this is a tuple
+                 image_folder,
+                 transform = None):
+        self.df_data        = df_data
+        self.data1          = data[0]
+        self.data2          = data[1]
+        self.image_folder   = image_folder
+        self.transform      = transform
+    def __len__(self):
+        return self.df_data.shape[0]
+    def __getitem__(self,index):
+        filename = os.path.join(self.image_folder,
+                                self.df_data.loc[index,'targets'],
+                                self.df_data.loc[index,'subcategory'],
+                                self.df_data.loc[index,'paths'].split('.')[0] + '.jpg')
+        image   = Image.open(filename).convert('RGB')
+        BOLD1   = torch.from_numpy(self.data1[index])
+        BOLD2   = torch.from_numpy(self.data2[index])
+        if self.transform is None:
+            self.transform = transforms.Compose([
+                    transforms.Resize((128,128)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                         [0.485, 0.456, 0.406],[0.229, 0.224, 0.225])])
+        image = self.transform(image)
+        return image,BOLD1,BOLD2,index
+
+def simple_image_augmentation(target_size = 128):
+    transform = transforms.Compose([
+# transforms.Grayscale(num_output_channels=1),
+ transforms.Resize((target_size,target_size)),
+ transforms.RandomRotation(45),
+ transforms.RandomHorizontalFlip(),
+ transforms.RandomVerticalFlip(),
+ transforms.ToTensor(),
+ transforms.Lambda(lambda x:x/255.),
+ # transforms.Normalize(
+ #                         mean=[0.485, 0.456, 0.406],
+ #                         std=[0.229, 0.224, 0.225])
+ ])
+    return transform
+
+def loader_wraper(_CustomLoader,
+                  batch_size = 8,
+                  shuffle = True,
+                  num_workers = 1,
+                  drop_last = True, 
+                  multiprocessing_context = 'fork',):
+    """just a pytorch data loader wrapper"""
+    Loader = DataLoader(_CustomLoader,
+                         batch_size                 = batch_size,
+                         shuffle                    = shuffle,
+                         num_workers                = num_workers,
+                         drop_last                  = drop_last,
+                         multiprocessing_context    = multiprocessing_context,
+                         )
+    return Loader
+
+def linear_block(input_size,output_size,activation_func = nn.ReLU):
+    return nn.Sequential(
+            nn.Linear(input_size,output_size,bias = True),
+            nn.BatchNorm1d(output_size),
+            activation_func(),
+            )
+
+def conv2d_block(in_channels,
+                 out_channels,
+                 kernel_size = (3,3),
+                 *args,**kwargs):
+    return nn.Sequential(
+            nn.Conv2d(in_channels   = in_channels,
+                      out_channels  = out_channels,
+                      kernel_size   = kernel_size,
+                      stride        = 1,
+                      padding       = 0,
+                      padding_mode  = 'zeros',
+                      bias          = True,
+                      ),
+            nn.Conv2d(in_channels   = out_channels,
+                      out_channels  = out_channels,
+                      kernel_size   = kernel_size,
+                      stride        = 1,
+                      padding       = 0,
+                      padding_mode  = 'zeros',
+                      bias          = True,
+                      ),
+            nn.BatchNorm2d(out_channels),
+            nn.MaxPool2d(kernel_size    = 2,
+                         stride         = 1,),
+            nn.ReLU(),
+            )
+
+def TransConv2d_block(in_channels,
+                      out_channels,
+                      kernel_size = (3,3,),
+                      scale_factor = 2,
+                      align_corners = 'bilinear',
+                      *args,**kwargs):
+    return nn.Sequential(
+            nn.Upsample(scale_factor = scale_factor,
+                        mode = align_corners,
+                        align_corners = True,),
+            nn.ConvTranspose1d(in_channels = in_channels,
+                               out_channels = out_channels,
+                               kernel_size = kernel_size,
+                               stride = 1,
+                               padding = 0,
+                               padding_mode = 'zeros',
+                               bias = True,
+                               ),
+            )
+
+def conv1d_block(in_channels,
+                 out_channels,
+                 kernel_size = 20,
+                 *args,**kwargs):
+    return nn.Sequential(
+                nn.Conv1d(in_channels   = in_channels,
+                          out_channels  = out_channels,
+                          kernel_size   = kernel_size,
+                          stride        = 1,
+                          padding       = 0,
+                          padding_mode  = 'zeros',
+                          bias          = True,),
+                nn.Conv1d(in_channels   = out_channels,
+                          out_channels  = out_channels,
+                          kernel_size   = kernel_size,
+                          stride        = 1,
+                          padding       = 0,
+                          padding_mode  = 'zeros',
+                          bias          = True,),
+                nn.BatchNorm1d(out_channels),
+                nn.MaxPool1d(kernel_size    = int(kernel_size)),
+                nn.SELU(),
+                )
+
+class image_encoder(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 model_name             = 'alexnet',
+                 pretrained             = True,
+                 latent_size            = 128,
                  ):
-        super(easy_model,self).__init__()
+        super(image_encoder,self).__init__()
         torch.manual_seed(12345)
-        in_features             = nn.AdaptiveAvgPool2d((1,1))(pretrain_model.features(torch.rand(*in_shape))).shape[1]
-        avgpool                 = nn.AdaptiveAvgPool2d((1,1))
-        hidden_layer            = nn.Linear(in_features,hidden_units)
-        output_layer            = nn.Linear(hidden_units,output_units)
-        if hidden_dropout > 0:
-            dropout             = nn.Dropout(p = hidden_dropout)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.model_name             = model_name
+        self.pretrained             = pretrained
+        self.latent_size            = latent_size
+        torch.manual_seed(12345)
+        self.pretrain_model         = candidate_pretrained_CNNs(model_name = self.model_name,
+                                                                pretrained = self.pretrained,)
+        if define_type(self.model_name) == 'simple':
+            self.pretrained_model = self.pretrain_model.features
+            self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+            self.in_features = 512#self.pretrain_model.classifier[0].in_features
+        elif define_type(self.model_name) == 'resnet':
+            self.pretrained_model = torch.nn.Sequential(*list(self.pretrain_model.children())[:-2])
+            self.in_features = self.pretrain_model.fc.in_features
+        self.latent_mu = linear_block(self.in_features,self.latent_size,nn.SELU)
+        self.latent_sigma = linear_block(self.in_features,self.latent_size,nn.SELU)
+    def forward(self,x):
+        if self.pretrained:
+            for params in self.pretrained_model:
+                params.requires_grad = False
+        features = self.pretrained_model(x)
+        pooling = torch.squeeze(torch.squeeze(self.avgpool(features),dim = 3),dim = 2)
+        mu = self.latent_mu(pooling)
+        var = self.latent_sigma(pooling)
+        return mu,var
+
+class image_decoder(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 image_size             = 128,
+                 latent_size            = 128,
+                 out_channels           = [128,64,32,16,8,4,3],
+                 kernel_size            = (2,2)
+                 ):
+        super(image_decoder,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.image_size             = image_size
+        self.latent_size            = latent_size
+        self.out_channels           = out_channels
+        self.kernel_size            = kernel_size
+        torch.manual_seed(12345)
         
-        print(f'feature dim = {in_features}')
-        self.features           = nn.Sequential(pretrain_model.features,
-                                                avgpool,)
-        if (hidden_activation is not None) and (hidden_dropout > 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                hidden_activation,
-                                                dropout,)
-        elif (hidden_activation is not None) and (hidden_dropout == 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                hidden_activation,)
-        elif (hidden_activation == None) and (hidden_dropout > 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                dropout,)
-        elif (hidden_activation == None) and (hidden_dropout == 0):
-            self.hidden_layer   = hidden_layer
+        self.transpose_conv_layers = []
+        for in_channel,out_channel in zip(self.out_channels[:-1],self.out_channels[1:]):
+            self.transpose_conv_layers.append(TransConv2d_block(in_channel,out_channel,kernel_size = self.kernel_size))
+        self.transpose_conv_layers = nn.Sequential(*self.transpose_conv_layers)
+        self.transposeConv2D = nn.ConvTranspose2d(3, 3, self.kernel_size)
+        self.output_activation = nn.Sigmoid()
+    
+    def forward(self,x):
+        out = torch.unsqueeze(x,2)
+        out = torch.unsqueeze(out,3)
+        out = self.transpose_conv_layers(out)
+        out = self.output_activation(self.transposeConv2D(out))
+        return out
+
+class IMAGE_VAE(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 model_name             = 'alexnet',
+                 pretrained             = True,
+                 latent_size            = 128,
+                 image_size             = 128,
+                 out_channels           = [128,64,32,16,8,4,3],
+                 kernel_size            = (2,2),
+                 sampling_method        = 'distribution',
+                 ):
+        super(IMAGE_VAE,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.model_name             = model_name
+        self.pretrained             = pretrained
+        self.latent_size            = latent_size
+        self.out_channels           = out_channels
+        self.kernel_size            = kernel_size
+        self.sampling_method        = sampling_method
         
-        self.output_layer       = output_layer
+        self.encoder                = image_encoder(
+            batch_size             = self.batch_size,
+            device                 = self.device,
+            model_name             = self.model_name,
+            pretrained             = self.pretrained,
+            latent_size            = self.latent_size,)
+        self.decoder                = image_decoder(
+            batch_size             = self.batch_size,
+            device                 = self.device,
+            out_channels           = self.out_channels,
+            kernel_size            = self.kernel_size,
+            latent_size            = self.latent_size,)
+        self.log_scale              = nn.Parameter(torch.Tensor([0.0]))
+        self.latent_activation      = nn.Tanh
+    
+    def reparameterize(self,):
+        mu = self.mu
+        log_var = self.log_var
+        std = torch.exp(torch.mul(log_var,0.5))
+        if self.sampling_method == 'old':
+            eps = torch.rand_like(std)
+            sample = mu + (eps * std)
+        elif self.sampling_method == 'distribution':
+            q = torch.distributions.Normal(mu,std)
+            sample = q.rsample() # only rsample allows gradient track
+            return sample
+        elif self.sampling_method == 'sampling_for_decoder':
+            q = torch.distributions.Normal(mu,std)
+            sample = q.sample()
+        if self.latent_activation is not None:
+            sample = self.latent_activation(sample)
+        return sample
+    
+    # strange behavior: nonzero loss of identical input and output
+    def gaussian_likelihood(self,y_true,y_pred,logscale = None):
+        if logscale is None:
+            logscale = nn.Parameter(torch.Tensor([0.0]))
+        scale = torch.exp(logscale)
+        # how huch y_pred could have been distributed using the current state as center
+        dist = torch.distributions.Normal(y_pred,scale)
+        
+        # measure prob of seeing image under p(x|z)
+        log_pxz = dist.log_prob(y_true)
+        
+        return log_pxz.mean(dim = (1,2,3))
+    
+    #https://towardsdatascience.com/variational-autoencoder-demystified-with-pytorch-implementation-3a06bee395ed
+    def kl_divergence(self,z,mu,std):
+        # --------------------------
+        # Monte carlo KL divergence
+        # --------------------------
+        # 1. define the first 2 probabilities
+        p = torch.distributions.Normal(torch.zeros_like(mu),torch.ones_like(std))
+        q = torch.distributions.Normal(mu,std)
+        
+        # 2. get the probability from the equation
+        log_qzx = q.log_prob(z)
+        log_pz = p.log_prob(z)
+        
+        # kl
+        kl = (log_qzx - log_pz)
+        kl = kl.mean(-1)
+        return kl
+    
+    def forward(self,data_tuple):
+        inputs,outputs = data_tuple
+        # encoding
+        self.mu,self.log_var = self.encoder(inputs)
+        latent_sample = self.reparameterize()
+        # decoding
+        outputs_hat = self.decoder(latent_sample)
+        # reconstruction loss
+        recon_loss = self.gaussian_likelihood(outputs_hat,self.log_scale,outputs) # is this always negative?
+        # recon_loss = nn.MSELoss()(outputs_hat,outputs)
+        kl_loss = self.kl_divergence(latent_sample,self.mu,torch.exp(self.log_var / 2))
+        
+        return outputs_hat,latent_sample,kl_loss - recon_loss
 
-    def forward(self,x,):
-        out     = torch.squeeze(torch.squeeze(self.features(x),3),2)
-        hidden  = self.hidden_layer(out)
-        outputs = self.output_layer(hidden)
-        return outputs,hidden
+class BOLD_encoder(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 input_size             = 40000,
+                 layers                 = [],
+                 latent_size            = 128,
+                 ):
+        super(BOLD_encoder,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.input_size             = input_size
+        self.layers                 = layers
+        self.latent_size            = latent_size
+        if len(self.layers) > 0:
+            self.intermedian_layers = nn.ModuleList()
+            self.intermedian_layers.append(linear_block(self.input_size,self.layers[0],nn.SELU))
+            for in_fe,out_fe in zip(self.layers[:-1],self.layers[1:]):
+                self.intermedian_layers.append(linear_block(in_fe,out_fe, nn.SELU))
+            self.intermedian_layers = nn.Sequential(self.intermedian_layers)
+            self.latent_mu = linear_block(self.layers[-1],self.latent_size,nn.SELU)
+            self.latent_sigma = linear_block(self.layers[-1],self.latent_size,nn.SELU)
+        else:
+            self.intermedian_layers = None
+            self.latent_mu = linear_block(self.input_size,self.latent_size,nn.SELU)
+            self.latent_sigma = linear_block(self.input_size,self.latent_size,nn.SELU)
+    def forward(self,x):
+        if self.intermedian_layers is not None:
+            out = self.intermedian_layers(x)
+            mu = self.latent_mu(out)
+            var = self.latent_sigma(out)
+        else:
+            mu = self.latent_mu(x)
+            var = self.latent_sigma(x)
+        return mu,var
 
-class Identity(nn.Module):
-    def __init__(self):
-        super(Identity, self).__init__()
+class BOLD_decoder(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 output_size            = 40000,
+                 layers                 = [],
+                 latent_size            = 128,
+                 ):
+        super(BOLD_decoder,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.output_size            = output_size
+        self.layers                 = layers
+        self.latent_size            = latent_size
+        if len(self.layers) > 0:
+            self.intermedian_layers = nn.ModuleList()
+            self.intermedian_layers.append(linear_block(self.latent_size,self.layers[0],nn.SELU))
+            for in_fe,out_fe in zip(self.layers[:-1],self.layers[1:]):
+                self.intermedian_layers.append(linear_block(in_fe,out_fe, nn.SELU))
+            self.intermedian_layers = nn.Sequential(self.intermedian_layers)
+            self.linear_out = linear_block(self.layers[-1],self.output_size,nn.Tanh)
+        else:
+            self.intermedian_layers = None
+            self.linear_out = linear_block(self.latent_size,self.output_size,nn.Tanh)
+        
+    def forward(self,x):
+        if self.intermedian_layers is not None:
+            x = self.intermedian_layers(x)
+        out = self.linear_out(x)
+        
+        return out
 
-    def forward(self, x):
+class BOLD_VAE(nn.Module):
+    def __init__(self,
+                 batch_size             = 8,
+                 device                 = 'cpu',
+                 input_size             = 40000, # whole brain
+                 output_size            = 3000, # reconstruct ROI
+                 encode_layers          = [],
+                 decode_layers          = [],
+                 latent_size            = 128,
+                 sampling_method        = 'distribution',
+                 ):
+        super(BOLD_VAE,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size             = batch_size
+        self.device                 = device
+        self.input_size             = input_size
+        self.output_size            = output_size
+        self.encode_layers          = encode_layers
+        self.decode_layers          = decode_layers
+        self.latent_size            = latent_size
+        self.sampling_method        = sampling_method
+        
+        self.encoder                = BOLD_encoder(
+            batch_size             = self.batch_size,
+            device                 = self.device,
+            input_size             = self.input_size,
+            layers                 = self.encode_layers,
+            latent_size            = self.latent_size,)
+        self.decoder                = BOLD_decoder(
+            batch_size             = self.batch_size,
+            device                 = self.device,
+            output_size            = self.output_size,
+            layers                 = self.decode_layers,
+            latent_size            = self.latent_size,)
+        self.log_scale              = nn.Parameter(torch.Tensor([0.0]))
+        self.latent_activation      = nn.Tanh
+    
+    def reparameterize(self,):
+        mu = self.mu
+        log_var = self.log_var
+        std = torch.exp(torch.mul(log_var,0.5))
+        if self.sampling_method == 'old':
+            eps = torch.rand_like(std)
+            sample = mu + (eps * std)
+        elif self.sampling_method == 'distribution':
+            q = torch.distributions.Normal(mu,std)
+            sample = q.rsample() # only rsample allows gradient track
+            return sample
+        elif self.sampling_method == 'sampling_for_decoder':
+            q = torch.distributions.Normal(mu,std)
+            sample = q.sample()
+        if self.latent_activation is not None:
+            sample = self.latent_activation(sample)
+        return sample
+    
+    def gaussian_likelihood(self,y_true,y_pred,logscale = None):
+        if logscale is None:
+            logscale = nn.Parameter(torch.Tensor([0.0]))
+        scale = torch.exp(logscale)
+        # how huch y_pred could have been distributed using the current state as center
+        dist = torch.distributions.Normal(y_pred,scale)
+        
+        # measure prob of seeing image under p(x|z)
+        log_pxz = dist.log_prob(y_true)
+        
+        return log_pxz.mean(-1)
+    
+    def kl_divergence(self,z,mu,std):
+        # 1. define the first 2 probabilities
+        p = torch.distributions.Normal(torch.zeros_like(mu),torch.ones_like(std))
+        q = torch.distributions.Normal(mu,std)
+        
+        # 2. get the probability from the equation
+        log_qzx = q.log_prob(z)
+        log_pz = p.log_prob(z)
+        
+        # kl
+        kl = (log_qzx - log_pz)
+        kl = kl.mean(-1)
+        return kl
+    
+    def forward(self,data_tuple):
+        inputs,outputs = data_tuple
+        # encoding
+        self.mu,self.log_var = self.encoder(inputs)
+        latent_sample = self.reparameterize()
+        print(latent_sample)
+        # decoding
+        outputs_hat = self.decoder(latent_sample)
+        
+        recon_loss = self.gaussian_likelihood(outputs_hat,self.log_scale,outputs) # is this always negative?
+        # recon_loss -= nn.MSELoss()(outputs_hat,outputs)
+        kl_loss = self.kl_divergence(latent_sample,self.mu,torch.exp(self.log_var / 2))
+        
+        return outputs_hat,latent_sample,kl_loss - recon_loss
+
+class Conv1D_model(nn.Module):
+    def __init__(self,
+                 batch_size     = 8,
+                 device         = 'cpu',
+                 out_channels   = [1,64,128,256,512],
+                 kernel_size    = 5, # why bother
+                 ):
+        super(Conv1D_model,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size         = batch_size
+        self.device             = device
+        self.out_channels       = out_channels
+        self.kernel_sizes       = [kernel_size] * len(self.out_channels)
+        self.conv_blocks        = []
+        for ii,in_channel in enumerate(self.out_channels[:-1]):
+             self.conv_blocks.append(conv1d_block(in_channel,
+                                                  out_channels[ii + 1],
+                                                  kernel_size = self.kernel_sizes[ii + 1]).to(self.device))
+        self.conv_blocks        = nn.ModuleList(self.conv_blocks)
+        self.adaptive_pooling   = nn.AdaptiveMaxPool1d(1).to(self.device)
+        self.linear             = nn.Linear(in_features = self.out_channels[-1],
+                                            out_features = 2,
+                                            bias = True).to(self.device)
+        # self.activation         = nn.Softmax(dim = -1).to(self.device)
+    def forward(self,x):
+        x                       = x.view(-1,1,x.shape[-1])
+        for block_func in self.conv_blocks:
+            x                   = block_func(x)
+        out                     = self.adaptive_pooling(x)
+        out                     = out.view(-1,self.out_channels[-1])
+        out                     = self.linear(out)
+        # out                     = self.activation(out)
+        return out
+
+def conv1dmodel_train_loop(classifier,
+                           optimizer,
+                           loss_func,
+                           data_train,
+                           targets_train,
+                           idx_train,
+                           ii_epoch,
+                           activation_func  = nn.Softmax(dim = -1),
+                           device           = 'cpu',
+                           batch_size       = 8,
+                           shuffle          = True,
+                           print_train      = True,
+                           valid_size       = 0.1,
+                           ):
+    torch.manual_seed(12345)
+    features,labels = data_train[idx_train],targets_train[idx_train]
+    features,labels = sk_shuffle(features,labels)
+    X_train,X_valid,y_train,y_valid = train_test_split(features,
+                                                       labels,
+                                                       test_size = valid_size,
+                                                       random_state = 12345,
+                                                       shuffle = True,
+                                                       )
+    # initialize
+    train_losses = 0.
+    valid_losses = 0.
+    
+    #https://github.com/pytorch/pytorch/issues/44687
+    dataset_train = TensorDataset(torch.from_numpy(X_train),
+                                  torch.from_numpy(y_train).float(),
+                                  )
+    dataloader_train = DataLoader(dataset_train,
+                                  batch_size                = batch_size,
+                                  shuffle                   = shuffle,
+                                  num_workers               = 1,
+                                  drop_last                 = True,
+                                  multiprocessing_context   ='fork',#
+                                  )
+    dataset_valid = TensorDataset(torch.from_numpy(X_valid),
+                                  torch.from_numpy(y_valid).float(),
+                                  )
+    dataloader_valid = DataLoader(dataset_valid,
+                                  batch_size                = batch_size,
+                                  shuffle                   = shuffle,
+                                  num_workers               = 1,
+                                  drop_last                 = True,
+                                  multiprocessing_context   ='fork',#
+                                  )
+    ############################# train #############################
+    classifier.train()
+    torch.set_grad_enabled(True)
+    if print_train:
+        t = tqdm(enumerate(dataloader_train))
+    else:
+        t = enumerate(dataloader_train)
+    for ii,(batch_features,batch_labels) in t:
+        # reset the gradients in the optimizer
+        optimizer.zero_grad()
+        
+        batch_features  = Variable(batch_features).to(device)
+        batch_labels    = Variable(batch_labels).to(device)
+        
+        batch_predictions = classifier(batch_features)
+        
+        loss = loss_func(activation_func(batch_predictions),batch_labels,)
+        loss.backward()
+        
+        optimizer.step()
+        
+        train_losses += loss.data
+        if print_train:
+            t.set_description(f'epoch {ii_epoch + 1:3d}, train loss = {train_losses/(ii+1):.6f}')
+    
+    ############################# validation #############################
+    classifier.eval()
+    with torch.no_grad():
+        if print_train:
+            t = tqdm(enumerate(dataloader_valid))
+        else:
+            t = enumerate(dataloader_valid)
+        for jj,(batch_features,batch_labels) in t:
+            batch_features      = Variable(batch_features).to(device)
+            batch_labels        = Variable(batch_labels).to(device)
+            batch_predictions   = classifier(batch_features)
+            loss                = loss_func(activation_func(batch_predictions),batch_labels,)
+            valid_losses        += loss.data
+            if print_train:
+                t.set_description(f'epoch {ii_epoch + 1:3d}, valid loss = {valid_losses/(jj+1):.6f}')
+    return train_losses / (ii + 1),valid_losses / (jj + 1)
+
+def conv1d_model_full_cycle(
+                idx_train_source,
+                idx_test_target,
+                data_source,
+                targets_source,
+                data_target,
+                targets_target,
+                current_fold    = 0,
+                batch_size      = 8,
+                device          = 'cpu',
+                out_channels    = [1,2,3,4,5],
+                kernel_size     = 5,
+                learning_rate   = 1e-4,
+                momentum        = 0.,
+                weight_decay    = 0.,
+                max_epochs      = int(1e3),
+                patience        = 5,
+                tol             = 1e-4,
+                model_name      = 'temp',
+                print_train     = True,
+                extra_data      = None,
+                ):
+    # initialize the classifier
+    classifier          = Conv1D_model(batch_size   = batch_size,
+                                       device       = device,
+                                       out_channels = out_channels,
+                                       kernel_size  = kernel_size,)
+    # print(classifier)
+    # define optimizer and loss function
+    optimizer           = torch.optim.SGD(classifier.parameters(), 
+                                          lr            = learning_rate,
+                                          momentum      = momentum,
+                                          weight_decay  = weight_decay, # add L2 regularization
+                                          )
+    loss_func           = torch.nn.BCELoss()
+    
+    best_valid_loss     = np.inf
+    count               = 0
+    for ii,ii_epoch in enumerate(range(max_epochs)):
+        train_loss,valid_loss = conv1dmodel_train_loop(
+                                        classifier,
+                                        optimizer,
+                                        loss_func,
+                                        data_source,
+                                        targets_source,
+                                        idx_train   = idx_train_source,
+                                        ii_epoch    = ii_epoch,
+                                        device      = device,
+                                        batch_size  = batch_size,
+                                        shuffle     = True,
+                                        print_train = print_train,
+                                        )
+        gc.collect()
+        # detemining stopping criteria
+        temp                        = valid_loss.detach().cpu().numpy()
+        if (best_valid_loss > temp) and (np.abs(best_valid_loss - temp) >= tol):
+            best_valid_loss         = temp
+            count                   = 0
+            # save the best model
+            if print_train:
+                print('getting better, saving the model weights')
+            torch.save(classifier.state_dict(),f'{model_name}_{current_fold}.pth')
+        else:
+            # classifier.load_state_dict(torch.load('temp.pth'))
+            count += 1
+        
+        if count >= patience:
+            classifier.load_state_dict(torch.load(f'{model_name}_{current_fold}.pth'))
+            try:
+                os.remove(f'{model_name}_{current_fold}.pth')
+            except:
+                pass
+            if print_train:
+                print("can't get any better, load the best model weights")
+            break
+    # arvix 2006.08476: not fully understood -- so, don't use it
+    if isinstance(extra_data, (list,tuple,np.ndarray)):
+        if print_train:
+            print('train the model with extra data')
+        with torch.no_grad():
+            softmax_func = torch.nn.Softmax(dim = -1).to(device)
+            psudo_labels = softmax_func(classifier(torch.from_numpy(extra_data.copy()).to(device))).detach().cpu().numpy()
+            psudo_labels = np.array(psudo_labels >= 0.5,dtype = int)
+        
+        data_to_train = np.concatenate([data_source,extra_data])
+        targets_to_train = np.concatenate([targets_source,psudo_labels])
+        idx_to_train = np.concatenate([idx_train_source,np.arange(extra_data.shape[0]) + data_source.shape[0]])
+        
+        # initialize the classifier
+        # classifier          = Conv1D_model(batch_size   = batch_size,
+        #                                     device       = device,
+        #                                     out_channels = out_channels,
+        #                                     kernel_size  = kernel_size,)
+        
+        best_valid_loss                 = np.inf
+        count                           = 0
+        for ii,ii_epoch in enumerate(range(max_epochs)):
+            train_loss,valid_loss = conv1dmodel_train_loop(
+                                            classifier,
+                                            optimizer,
+                                            loss_func,
+                                            data_to_train,
+                                            targets_to_train,
+                                            idx_train   = idx_to_train,
+                                            ii_epoch    = ii_epoch,
+                                            device      = device,
+                                            batch_size  = batch_size,
+                                            shuffle     = True,
+                                            print_train = print_train,
+                                            )
+            gc.collect()
+            # detemining stopping criteria
+            temp                        = valid_loss.detach().cpu().numpy()
+            if (best_valid_loss > temp) and (np.abs(best_valid_loss - temp) >= tol):
+                best_valid_loss         = temp
+                count                   = 0
+                # save the best model
+                if print_train:
+                    print('getting better, saving the model weights')
+                torch.save(classifier.state_dict(),f'{model_name}_{current_fold}.pth')
+            else:
+                # classifier.load_state_dict(torch.load('temp.pth'))
+                count += 1
+            
+            if count >= patience:
+                classifier.load_state_dict(torch.load(f'{model_name}_{current_fold}.pth'))
+                try:
+                    os.remove(f'{model_name}_{current_fold}.pth')
+                except:
+                    pass
+                if print_train:
+                    print("can't get any better, load the best model weights")
+                break
+    
+    # test
+    classifier.eval()
+    with torch.no_grad():
+        softmax_func = torch.nn.Softmax(dim = -1).to(device)
+        y_pred = softmax_func(classifier(torch.from_numpy(data_target[idx_test_target]).to(device))).detach().cpu().numpy()
+    y_true = targets_target[idx_test_target]
+    
+    score = roc_auc_score(y_true,y_pred)
+    return score
+
+class _Conv2D_model(nn.Module):
+    def __init__(self,
+                 batch_size     = 8,
+                 device         = 'cpu',
+                 in_channel     = 88,
+                 out_channels   = [100,64,128,256,512],
+                 kernel_size    = (5,5),
+                 ):
+        super(_Conv2D_model,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size         = batch_size
+        self.device             = device
+        self.in_channel         = in_channel
+        self.out_channels       = out_channels
+        self.kernel_size        = kernel_size
+        self.conv_blocks        = []
+        in_channel              = self.in_channel
+        for ii,out_channel in enumerate(self.out_channels):
+             self.conv_blocks.append(conv2d_block(in_channel,
+                                                  out_channel,
+                                                  kernel_size = self.kernel_size).to(self.device))
+             in_channel = out_channel
+        self.conv_blocks        = nn.ModuleList(self.conv_blocks)
+        self.adaptive_pooling   = nn.AdaptiveMaxPool2d((1,1)).to(self.device)
+    def forward(self,x):
+        for block_func in self.conv_blocks:
+            x                   = block_func(x)
+        out                     = self.adaptive_pooling(x)
+        out                     = out.view(-1,self.out_channels[-1])
+        return out
+
+class Conv2D_model(nn.Module):
+    def __init__(self,
+                 batch_size     = 8,
+                 device         = 'cpu',
+                 in_channels    = (66,88,88),
+                 out_channels   = [100,64,128,256,],
+                 kernel_sizes   = [(8,8),(8,6),(8,6)],
+                 ):
+        super(Conv2D_model,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size         = batch_size
+        self.device             = device
+        self.in_channels        = in_channels
+        self.out_channels       = out_channels
+        self.kernel_sizes       = kernel_sizes
+        self.view1              = _Conv2D_model(in_channel = self.in_channels[0],
+                                                kernel_size = self.kernel_sizes[0],
+                                                out_channels =  self.out_channels,
+                                                device = self.device,
+                                                batch_size = self.batch_size,
+                                                )
+        self.view2              = _Conv2D_model(in_channel = self.in_channels[1],
+                                                kernel_size = self.kernel_sizes[1],
+                                                out_channels =  self.out_channels,
+                                                device = self.device,
+                                                batch_size = self.batch_size,
+                                                )
+        self.view3              = _Conv2D_model(in_channel = self.in_channels[2],
+                                                kernel_size = self.kernel_sizes[2],
+                                                out_channels =  self.out_channels,
+                                                device = self.device,
+                                                batch_size = self.batch_size,
+                                                )
+        self.activation         = nn.Sigmoid().to(self.device)
+    def forward(self,x):
+        x1 = x
+        x2 = x.permute(0,2,3,1)
+        x3 = x.permute(0,3,2,1)
+        
+        out1 = self.activation(self.view1(x1))
+        out2 = self.activation(self.view2(x2))
+        out3 = self.activation(self.view3(x3))
+        return out1,out2,out3
+
+
+'''
+class feature_extractor(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_channels = 88,# or 66
+                 out_channels = [64,64,64,128,128,256,256,512],
+                 kernel_size = [(3,3),(3,3),(3,3),(3,3),(3,3),(3,3),(3,3),(3,3)],
+                 ):
+        super(feature_extractor,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size = batch_size
+        self.device = device
+        self.input_channels = input_channels
+        self.kernel_size = kernel_size
+        self.conv_block1 = conv_block(input_channels,
+                                      out_channels[0],
+                                      kernel_size = self.kernel_size[0],).to(self.device)
+        self.conv_blocks = []
+        for ii,in_channel in enumerate(out_channels[:-1]):
+             self.conv_blocks.append(conv_block(in_channel,
+                                                out_channels[ii + 1],
+                                                kernel_size = self.kernel_size[ii + 1]).to(self.device))
+        self.conv_blocks = nn.ModuleList(self.conv_blocks)
+    
+    def forward(self,x):
+        out = self.conv_block1(x)
+        for block_func in self.conv_blocks:
+            out = block_func(out)
+        
+        return out
+
+class simple_classifier(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_shape = 512,):
+        super(simple_classifier,self).__init__()
+        torch.manual_seed(12345)
+        self.batch_size = batch_size
+        self.device = device
+        self.linear = nn.Linear(in_features = input_shape,out_features = batch_size,).to(self.device)
+        self.activation = nn.Softmax(dim = -1).to(device)
+    
+    def forward(self,x):
+        x = self.linear(x)
+        x = self.activation(x)
         return x
 
-class resnet_model(nn.Module):
-    """
-    Models are not created equally
-    Some pretrained models are composed by a {feature} and a {fc} component
-    thus, they are very easy to modify and transfer learning
-
-    Inputs
-    --------------------
-    pretrain_model: nn.Module, pretrained model object
-    hidden_units: int, hidden layer units
-    hidden_activation: nn.Module, activation layer
-    hidden_dropout: float (0,1), dropout rate
-    output_units: int, output layer units
-
-    Outputs
-    --------------------
-    model: nn.Module, a modified model with new {fc} component with
-    {feature} frozen untrainable <-- this is done prior to feed to this function
-    """
-
+class CNN2D_model(nn.Module):
     def __init__(self,
-                 pretrain_model,
-                 hidden_units,
-                 hidden_activation,
-                 hidden_dropout,
-                 output_units,
+                 batch_size = 2,
+                 device = 'cpu',
+                 kernel_sizes = [(3,3),(3,2),(3,3)],
+                 input_channles = [88,88,66],
+                 out_channels = [64,64,64,128,128,256,256,512],
                  ):
-        super(resnet_model,self).__init__()
+        super(CNN2D_model,self).__init__()
         torch.manual_seed(12345)
-        avgpool         = nn.AdaptiveAvgPool2d((1,1))
-        in_features     = pretrain_model.fc.in_features
-        hidden_layer    = nn.Linear(in_features,hidden_units)
-        dropout         = nn.Dropout(p = hidden_dropout)
-        output_layer    = nn.Linear(hidden_units,output_units)
-        res_net         = torch.nn.Sequential(*list(pretrain_model.children())[:-2])
-        print(f'feature dim = {in_features}')
+        self.batch_size = batch_size
+        self.device = device
+        self.kernel_sizes = kernel_sizes
+        self.input_channels = input_channles
+        self.AdaptivePool = nn.AdaptiveMaxPool2d((1,1)).to(self.device)
+        self.out_channels = out_channels
+        self.feature_extractors_0 = feature_extractor(batch_size = self.batch_size,
+                                                      device = self.device,
+                                                      input_channels = self.input_channels[0],
+                                                      kernel_size = self.kernel_sizes[0],
+                                                      out_channels = self.out_channels,).to(self.device)
+        self.feature_extractors_1 = feature_extractor(batch_size = self.batch_size,
+                                                      device = self.device,
+                                                      input_channels = self.input_channels[1],
+                                                      kernel_size = self.kernel_sizes[1],
+                                                      out_channels = self.out_channels,).to(self.device)
+        self.feature_extractors_2 = feature_extractor(batch_size = self.batch_size,
+                                                      device = self.device,
+                                                      input_channels = self.input_channels[2],
+                                                      kernel_size = self.kernel_sizes[2],
+                                                      out_channels = self.out_channels,).to(self.device)
+        self.activation = nn.ReLU()
+        self.classifier = simple_classifier(batch_size = self.batch_size,
+                                            device = self.device,
+                                            input_shape = self.out_channels[-1])
+    def forward(self,x):
+        # x0 is x
+        # print(x.shape)
+        # x1 is x.permute
+        x1 = x.permute(0,2,3,1)
+        # print(x1.shape)
+        # x2 is x.permute
+        x2 = x.permute(0,3,2,1)
+        # print(x2.shape)
         
-        self.features           = nn.Sequential(res_net,
-                                      avgpool)
-        if (hidden_activation is not None) and (hidden_dropout > 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                hidden_activation,
-                                                dropout,)
-        elif (hidden_activation is not None) and (hidden_dropout == 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                hidden_activation,)
-        elif (hidden_activation == None) and (hidden_dropout > 0):
-            self.hidden_layer   = nn.Sequential(hidden_layer,
-                                                dropout,)
-        elif (hidden_activation == None) and (hidden_dropout == 0):
-            self.hidden_layer   = hidden_layer
-        self.output_layer       = output_layer
+        out0 = self.feature_extractors_0(x)
+        out1 = self.feature_extractors_1(x1)
+        out2 = self.feature_extractors_2(x2)
+#        print(out0.shape,out1.shape,out2.shape)
         
-    def forward(self,x):
-        out     = torch.squeeze(torch.squeeze(self.features(x),3),2)
-        hidden  = self.hidden_layer(out)
-        outputs = self.output_layer(hidden)
-        return outputs,hidden
+        out0 = self.activation(self.AdaptivePool(out0).view(-1,1,out0.size()[1]))
+        out1 = self.activation(self.AdaptivePool(out1).view(-1,1,out1.size()[1]))
+        out2 = self.activation(self.AdaptivePool(out2).view(-1,1,out2.size()[1]))
+        
+        outs = torch.cat([out0,out1,out2],0).view(-1,self.out_channels[-1])
+        
+        outs = self.classifier(outs)
+        
+        return outs,(out0,out1,out2)
 
-class _inception_model(nn.Module):
-    """
-    MARK: private function
-    Models are not created equally
-    Some pretrained models are composed by a {feature} and a {fc} component,
-    while having an {aux_logits} object
-
-    Inputs
-    --------------------
-    pretrain_model: nn.Module, pretrained model object
-    hidden_units: int, hidden layer units
-    hidden_activation: nn.Module, activation layer
-    hidden_dropout: float (0,1), dropout rate
-    output_units: int, output layer units
-
-    Outputs
-    --------------------
-    model: nn.Module, a modified model with new {fc} component with
-    {feature} frozen untrainable <-- this is done prior to feed to this function
-    """
+class Encoder(nn.Module):
     def __init__(self,
-                 pretrain_model,
-                 hidden_units,
-                 hidden_activation,
-                 hidden_dropout,
-                 output_units,
-                 ):
-        super(_inception_model,self).__init__()
-
-
-        self.pretrain_model             = pretrain_model
-        self.hidden_units               = hidden_units
-        self.hidden_activation          = hidden_activation
-        self.hidden_dropout             = hidden_dropout
-        self.output_units               = output_units
-        self.dropout                    = nn.Dropout(p = hidden_dropout)
-        in_features                     = self.pretrain_model.fc.in_features
-        print(f'feature dim = {in_features}')
-        self.hidden_layer               = nn.Linear(in_features,self.hidden_units)
-        self.output_layer               = nn.Linear(self.hidden_units,self.output_units)
-        self.pretrain_model.aux_logits  = False
-        self.pretrain_model.fc          = self.hidden_layer
-
+                 batch_size = 8,
+                 device = 'cpu',
+                 num_classes = 2,
+                 feature_extractor = None,
+                 dim_cat = 1,
+                 hidden_feature_size = 1,):
+        super(Encoder,self,).__init__()
+        torch.manual_seed(12345)
+        self.batch_size = batch_size
+        self.device = device
+        self.dim_cat = dim_cat
+        self.hidden_feature_size = hidden_feature_size
+        if feature_extractor is not None:
+            self.feature_extractor = feature_extractor
+        else:
+            self.feature_extractor = CNN2D_model(batch_size = self.batch_size)
+        self.rnn = nn.GRU(input_size = 512,
+                          hidden_size = self.hidden_feature_size,
+                          num_layers = 1,
+                          batch_first = True,
+                          bidirectional = True,)
+        self.linear = nn.Linear(10,num_classes)
+        self.out_activation = nn.Softmax(dim = -1)
     def forward(self,x):
-        inception_net                   = self.pretrain_model
-        hidden                          = inception_net(x)
-        hidden                          = self.hidden_layer(hidden)
-        if self.hidden_activation is not None:
-            hidden                  = self.hidden_activation(hidden)
-        if self.hidden_dropout > 0:
-            hidden              = self.dropout(hidden)
-        outputs                 = self.output_layer(hidden)
+        feature_extractor = self.feature_extractor
+        outs = feature_extractor(x)
+        features = torch.cat(outs,dim = self.dim_cat)
+        out,hidden = self.rnn(features)
+        return out,hidden
 
-        return outputs,hidden
-
-def build_model(pretrain_model_name,
-                hidden_units,
-                hidden_activation,
-                hidden_dropout,
-                output_units,
-                ):
-    pretrain_model      = candidates(pretrain_model_name)
-    for params in pretrain_model.parameters():
-        params.requires_grad = False
-    if define_type(pretrain_model_name) == 'simple':
-        model_to_train = easy_model(
-                            pretrain_model      = pretrain_model,
-                            hidden_units        = hidden_units,
-                            hidden_activation   = hidden_activation,
-                            hidden_dropout      = hidden_dropout,
-                            output_units        = output_units,
-                            )
-    elif define_type(pretrain_model_name) == 'inception':
-        model_to_train = _inception_model(
-                            pretrain_model      = pretrain_model,
-                            hidden_units        = hidden_units,
-                            hidden_activation   = hidden_activation,
-                            hidden_dropout      = hidden_dropout,
-                            output_units        = output_units,
-                            )
-    elif define_type(pretrain_model_name) == 'resnet':
-        model_to_train = resnet_model(
-                            pretrain_model      = pretrain_model,
-                            hidden_units        = hidden_units,
-                            hidden_activation   = hidden_activation,
-                            hidden_dropout      = hidden_dropout,
-                            output_units        = output_units,
-                            )
-    return model_to_train
-
-def build_model_first_layer(CNN_backbone_model_name,
-                            trained_model):
-    for params in trained_model.parameters():
-        params.requires_grad = False
-    first_layer = trained_model[0]
-    return first_layer
-
-class modified_model(nn.Module):
+class rnn_classifier(nn.Module):
     def __init__(self,
-                 model_to_train,
-                 hidden_units       = 2,
-                 layer_type         = 'linear', # or RNN
-                 layer_units        = 2,
-                 layer_activation   = 'selu',
-                 layer_dropout      = 0.
-                 ):
-        super(modified_model,self).__init__()
-        layer_activation = hidden_activation_functions(layer_activation)
-        self.model_to_train = model_to_train
-        if layer_type == 'linear':
-            RL_layer            = nn.Linear(hidden_units,layer_units)
-            dropout             = nn.Dropout(p = layer_dropout)
-            output_layer        = nn.Linear(layer_units,2)
-            
-            if (layer_activation is not None) and (layer_dropout > 0):
-                self.RL_layer   = nn.Sequential(RL_layer,
-                                                layer_activation,
-                                                dropout,)
-            elif (layer_activation is not None) and (layer_dropout == 0):
-                self.RL_layer   = nn.Sequential(RL_layer,
-                                                layer_activation,)
-            elif (layer_activation == None) and (layer_dropout == 0):
-                self.RL_layer   = RL_layer
-            self.output_layer   = nn.Sequential(output_layer,
-                                                nn.Softmax(dim = 1),
-                                                )
+                 batch_size = 8,
+                 device = 'cpu',
+                 num_classes = 2,
+                 feature_extractor = None):
+        super(rnn_classifier,self,).__init__()
+        torch.manual_seed(12345)
+        self.batch_size = batch_size
+        self.device = device
+        if feature_extractor is not None:
+            self.feature_extractor = feature_extractor
+        else:
+            self.feature_extractor = CNN2D_model(batch_size = self.batch_size)
+        self.rnn = nn.GRU(input_size = 512,
+                          hidden_size = 5,
+                          num_layers = 1,
+                          batch_first = True,
+                          bidirectional = True,)
+        self.linear = nn.Linear(10,num_classes)
+        self.out_activation = nn.Softmax(dim = -1)
     def forward(self,x):
-        catagory,hidden_representation = self.model_to_train(x)
-        RL_output = self.RL_layer(hidden_representation)
-        out = self.output_layer(RL_output)
-        return catagory,hidden_representation,out
+        feature_extractor = self.feature_extractor
+        outs = feature_extractor(x)
+        features = torch.cat(outs,dim = 1)
+        out,hidden = self.rnn(features)
+        out = self.linear(out)
+        out = torch.mean(out,dim = 1)
+        out = self.out_activation(out)
+        return out,hidden
+
+
+
+class simple_encoder(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 ):
+        super(simple_encoder,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.latent_size = latent_size
+        self.intermediate_size = intermediate_size
+        torch.manual_seed(12345)
+        self.layer1 = linear_block(self.input_size,self.intermediate_size)
+        self.latent_layer = linear_block(self.intermediate_size,self.latent_size,nn.SELU)
+    def forward(self,x):
+#        x = x.view(-1,self.input_size)
+        out = self.layer1(x)
+        out = self.latent_layer(out)
+        return out
+
+class image_vae_encoder(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = (1,3,128,128),
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 model_name = 'alexnet',
+                 pretrained = True,
+                 ):
+        super(image_vae_encoder,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.latent_size = latent_size
+        self.intermediate_size = intermediate_size
+        self.model_name = model_name
+        self.pretrained = pretrained
+        torch.manual_seed(12345)
+        self.pretrain_model = candidate_pretrained_CNNs(model_name = self.model_name,
+                                                        pretrained = self.pretrained,)
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.scaling = nn.SELU()
+        if define_type(self.model_name) == 'simple':
+            self.pretrained_model = self.pretrain_model.features
+            self.in_features = self.avgpool(self.pretrained_model(torch.rand(*self.input_size))).shape[1]
+        elif define_type(self.model_name) == 'resnet':
+            self.pretrained_model = torch.nn.Sequential(*list(self.pretrain_model.children())[:-2])
+            self.in_features = self.pretrain_model.fc.in_features
+        self.latent_layer = linear_block(self.in_features,self.latent_size,nn.SELU)
+    def forward(self,x):
+        if self.pretrained:
+            for params in self.pretrained_model:
+                params.requires_grad = False
+        features = self.pretrained_model(x)
+        pooling = self.scaling(torch.squeeze(self.avgpool(features)))
+        mu = self.latent_layer(pooling)
+        var = self.latent_layer(pooling)
+        return mu,var
+
+class vae_encoder(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 ):
+        super(vae_encoder,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.latent_size = latent_size
+        self.intermediate_size = intermediate_size
+        torch.manual_seed(12345)
+        self.layer1 = linear_block(self.input_size,self.intermediate_size)
+        self.latent_layer = linear_block(self.intermediate_size,self.latent_size,nn.SELU)
+    def forward(self,x):
+#        x = x.view(-1,self.input_size)
+        out = self.layer1(x)
+        mu = self.latent_layer(out)
+        var = self.latent_layer(out)
+        return mu,var
+
+def stack_perceptron_layers(latent_size = 2,
+                            intermediate_sizes = (1280,256),
+                            ):
+    temp = [linear_block(latent_size,intermediate_sizes[0])]
+    for ii,intermediate_size in enumerate(intermediate_sizes):
+        if ii != 0:
+            temp.append(linear_block(intermediate_sizes[ii - 1],
+                                     intermediate_size))
+    return nn.Sequential(*temp)
+
+class simple_decoder(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 output_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280
+                 ):
+        super(simple_decoder,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.output_size = output_size
+        self.latent_size = latent_size
+        self.intermediate_size = intermediate_size
+        torch.manual_seed(12345)
+        if type(intermediate_size) == int:
+            self.latent_layer = linear_block(self.latent_size,self.intermediate_size)
+            self.layer_out = linear_block(self.intermediate_size,self.output_size,nn.Sigmoid)
+        else:
+            self.stack_layers = stack_perceptron_layers(self.latent_size,self.intermediate_size)
+            self.layer_out = linear_block(self.intermediate_size[-1],self.output_size,nn.Sigmoid)
+    def forward(self,x):
+        if type(self.intermediate_size) == int:
+            out = self.latent_layer(x)
+        else:
+            out = self.stack_layers(x)
+        out = self.layer_out(out)
+        return out
+
+class AE(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = 5000,
+                 output_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 ):
+        super(AE,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.output_size = output_size
+        self.latent_size = latent_size
+        self.intermediate_size = intermediate_size
+        torch.manual_seed(12345)
+        self.Encoder = simple_encoder(batch_size = self.batch_size,
+                                      device = self.device,
+                                      input_size = self.input_size,
+                                      latent_size = self.latent_size,
+                                      intermediate_size = self.intermediate_size,
+                                      )
+        self.Decoder = simple_decoder(batch_size = self.batch_size,
+                                      device = self.device,
+                                      output_size = self.output_size,
+                                      latent_size = self.latent_size,
+                                      intermediate_size = self.intermediate_size
+                                      )
+        self.log_scale = nn.Parameter(torch.Tensor([0.0]))
+        
+    def gaussian_likelihood(self,y_hat,logscale,y):
+        scale = torch.exp(logscale)
+        mean = y_hat
+        dist = torch.distributions.Normal(mean,scale)
+        
+        # measure prob of seeing image under p(x|z)
+        log_pxz = dist.log_prob(y)
+        return torch.abs(log_pxz.mean(-1))
     
-def createLossAndOptimizer(net, learning_rate:float = 1e-4):
-    """
-    To create the loss function and the optimizer
+    def forward(self,data_tuple):
+        x,y = data_tuple
+        latent_space = self.Encoder(x)
+        y_hat = self.Decoder(latent_space)
+        recon_loss = self.gaussian_likelihood(y_hat,self.log_scale,y)
+        recon_loss += nn.MSELoss()(y_hat,y)
+        return y_hat,recon_loss
 
-    Inputs
-    ----------------
-    net: nn.Module, torch model class containing parameters method
-    learning_rate: float, learning rate
+class LinearSVM(nn.Module):
+    def __init__(self,
+                 class_size = 2,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = 5000,
+                 ):
+        super(LinearSVM,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.class_size = class_size
+        self.input_size = input_size
+        torch.manual_seed(12345)
+        self.classify_layer = linear_block(self.input_size,self.class_size,nn.Softmax)
+    def forward(self,data_tuple):
+        x,y = data_tuple
+        out = self.classify_layer(x)
+        loss = nn.BCELoss()(out.float(),y.float())
+        return out,loss
 
-    Outputs
-    ----------------
-    loss: nn.Module, loss function
-    optimizer: torch.optim, optimizer
-    """
-    #Loss function
-    loss        = nn.BCELoss()
-    #Optimizer
-    optimizer   = optim.Adam([params for params in net.parameters()],
-                              lr = learning_rate,
-                              weight_decay = 1e-6)
 
-    return(loss, optimizer)
-
-def train_loop(net,
-               loss_func,
-               optimizer,
-               dataloader,
-               device,
-               categorical          = True,
-               idx_epoch            = 1,
-               print_train          = False,
-               output_activation    = 'softmax',
-               l2_lambda            = 0,
-               l1_lambda            = 0,
-               n_noise              = 0,
-               use_hingeloss        = False,
-               ):
-    """
-    A for-loop of train the autoencoder for 1 epoch
-
-    Inputs
-    -----------
-    net: nn.Module, torch model class containing parameters method
-    loss_func: nn.Module, loss function
-    optimizer: torch.optim, optimizer
-    dataloader: torch.data.DataLoader
-    device:str or torch.device, where the training happens
-    categorical:Boolean, whether to one-hot the label according to the output activation function
-    idx_epoch:int, for print
-    print_train:Boolean, debug tool
-    output_activation:string, activation function prior to loss function computation, calling the inner dictionary
-    l2_lambda:float, L2 regularization lambda term
-    l1_lambda:float, L1 regularization lambdd term
-    n_noise: int, number of noise images to add to the training batch
-
-    Outputs
-    ----------------
-    train_loss: torch.Float, average training loss
-    net: nn.Module, the updated model
-
-    """
-    from tqdm import tqdm
-    train_loss              = 0.
-    output_activation_func  = output_act_func_dict[output_activation]
-    # set the model to "train"
-    net.to(device).train(True)
-    # verbose level
-    if print_train:
-        iterator = tqdm(enumerate(dataloader))
-    else:
-        iterator = enumerate(dataloader)
-
-    for ii,(features,labels) in iterator:
-        if "Binary Cross Entropy" in loss_func.__doc__:
-            labels = labels.float() # I indeed hate this
+class VAE(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 input_size = 5000,
+                 output_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 sample_method = 'old',
+                 model_name = 'alexnet',
+                 pretrained = True,
+                 ):
+        super(VAE,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.output_size = output_size
+        self.latent_size = latent_size
+        self.sample_method = sample_method
+        self.intermediate_size = intermediate_size
+        self.model_name = model_name
+        self.pretrained = pretrained
+        torch.manual_seed(12345)
+        if type(self.input_size) != int:
+            self.Encoder = image_vae_encoder(batch_size = self.batch_size,
+                                             device = self.device,
+                                             input_size = input_size,
+                                             latent_size = self.latent_size,
+                                             intermediate_size = self.intermediate_size,
+                                             model_name = self.model_name,
+                                             pretrained = self.pretrained,
+                                             )
+        else:
+            self.Encoder = vae_encoder(batch_size = self.batch_size,
+                                          device = self.device,
+                                          input_size = self.input_size,
+                                          latent_size = self.latent_size,
+                                          intermediate_size = self.intermediate_size,
+                                          )
+        self.Decoder = simple_decoder(batch_size = self.batch_size,
+                                      device = self.device,
+                                      output_size = self.output_size,
+                                      latent_size = self.latent_size,
+                                      intermediate_size = self.intermediate_size
+                                      )
+        self.log_scale = nn.Parameter(torch.Tensor([0.0]))
+    
+    def reparameterize(self,mu,log_var,activation_func = None):
+        if self.sample_method == 'old':
+            std = torch.exp(0.5 * log_var)
+            eps = torch.rand_like(std)
+            sample = mu + (eps * std)
+            return sample
+        elif self.sample_method == 'distribution':
+            std = torch.exp(log_var / 2)
+            q = torch.distributions.Normal(mu,std)
+            sample = q.rsample() # only rsample allows gradient track
+            return sample
+        elif self.sample_method == 'sampling_for_decoder':
+            std = torch.exp(log_var / 2)
+            q = torch.distributions.Normal(mu,std)
+            sample = q.sample()
+            if activation_func is not None:
+                sample = activation_func(sample)
+            return sample
+    
+    def gaussian_likelihood(self,y_hat,logscale,y):
+        scale = torch.exp(logscale)
+        mean = y_hat
+        dist = torch.distributions.Normal(mean,scale)
         
-        if n_noise > 0:
-            # in order to have desired classification behavior, which is to predict
-            # chance when no signal is present, we manually add some noise samples
-            noise_generator = torch.distributions.normal.Normal(features.mean(),
-                                                                features.std())
-            noisy_features  = noise_generator.sample(features.shape)[:n_noise]
-            noisy_labels    = torch.tensor([0.5] * labels.shape[0])[:n_noise]
-            
-            
-            features        = torch.cat([features,noisy_features])
-            labels          = torch.cat([labels,noisy_labels])
+        # measure prob of seeing image under p(x|z)
+        log_pxz = dist.log_prob(y)
+        
+#        _sum_of_errors = torch.sum(torch.pow(y - y_hat,2)).item()
+#        _total_erros = torch.sum(torch.pow(y - torch.mean(y),2)).item()
+#        _y_sum = torch.sum(y).item()
+#        _y_sq_sum = torch.sum(torch.pow(y,2)).item()
+##        r2_loss = 1 - _sum_of_errors / (_y_sq_sum - (_y_sum ** 2) / y.shape[0])
+#        r2_loss = 1 - _sum_of_errors / _total_erros
+#        if r2_loss >= 0 :
+#            r2_loss = -(1 - r2_loss)
+        
+        return log_pxz.mean(-1)
+    
+    def kl_divergence(self,z,mu,std):
+        # 1. define the first 2 probabilities
+        p = torch.distributions.Normal(torch.zeros_like(mu),torch.ones_like(std))
+        q = torch.distributions.Normal(mu,std)
+        
+        # 2. get the probability from the equation
+        log_qzx = q.log_prob(z)
+        log_pz = p.log_prob(z)
+        
+        # kl
+        kl = (log_qzx - log_pz)
+        kl = kl.mean(-1)
+        return kl
+    
+    def forward(self,data_tuple):
+        x,y = data_tuple
+        # encoding
+        self.mu,self.log_var = self.Encoder(x)
+        sample = self.reparameterize(self.mu,self.log_var,nn.SELU)
+        # decoding
+        y_hat = self.Decoder(sample)
+        
+        recon_loss = self.gaussian_likelihood(y_hat,self.log_scale,y)
+        recon_loss -= nn.MSELoss()(y_hat,y)
+        kl_loss = self.kl_divergence(sample,self.mu,torch.exp(self.log_var / 2))
+        
+        return y_hat,kl_loss - recon_loss
 
-        # shuffle the training batch
-        np.random.seed(12345)
-        idx_shuffle         = np.random.choice(features.shape[0],features.shape[0],replace = False)
-        features            = features[idx_shuffle]
-        labels              = labels[idx_shuffle]
+class combined_model(nn.Module):
+    def __init__(self,
+                 batch_size = 8,
+                 device = 'cpu',
+                 class_size = 2,
+                 input_size = 5000,
+                 output_size = 5000,
+                 latent_size = 2,
+                 intermediate_size = 1280,
+                 sample_method = 'old',
+                 hidden_classification = False,
+                 ):
+        super(combined_model,self).__init__()
+        self.batch_size = batch_size
+        self.device = device
+        self.input_size = input_size
+        self.output_size = output_size
+        self.latent_size = latent_size
+        self.sample_method = sample_method
+        self.intermediate_size = intermediate_size
+        self.hidden_classification = hidden_classification
+        self.class_size = class_size
+        torch.manual_seed(12345)
+        
+        if self.sample_method is None:
+            self.autoencoder = AE(batch_size = self.batch_size,
+                                  device = self.device,
+                                  input_size = self.input_size,
+                                  output_size = self.output_size,
+                                  latent_size = self.latent_size,
+                                  intermediate_size = self.intermediate_size,
+                                  )
+        else:
+            self.autoencoder = VAE(batch_size = self.batch_size,
+                                   device = self.device,
+                                   input_size = self.input_size,
+                                   output_size = self.output_size,
+                                   latent_size = self.latent_size,
+                                   intermediate_size = self.intermediate_size,
+                                   sample_method = self.sample_method,
+                                   )
+        if self.hidden_classification:
+            self.classifier = LinearSVM(class_size = self.class_size,
+                                        batch_size = self.batch_size,
+                                        device = self.device,
+                                        input_size = self.latent_size,
+                                        )
+        else:
+            self.classifier = LinearSVM(class_size = self.class_size,
+                                        batch_size = self.batch_size,
+                                        device = self.device,
+                                        input_size = self.input_size,
+                                        )
+    def forward(self,data_tuple):
+        x,y,label = data_tuple
+        if self.sample_method is not None: # variational
+            # encoding
+            self.mu,self.log_var = self.autoencoder.Encoder(x)
+            sample = self.autoencoder.reparameterize(self.mu,self.log_var)
+            # decoding
+            y_hat = self.autoencoder.Decoder(sample)
+            
+            recon_loss = self.autoencoder.gaussian_likelihood(y_hat,self.log_scale,y)
+            kl_loss = self.autoencoder.kl_divergence(sample,self.mu,torch.exp(self.log_var / 2))
+            autoencoder_loss = kl_loss - recon_loss
+        else: # simple autoencoder
+            sample = self.autoencoder.Encoder(x)
+            # decoding
+            y_hat = self.autoencoder.Decoder(sample)
+#            recon_loss = self.gaussian_likelihood(y_hat,self.log_scale,y)
+            recon_loss = nn.MSELoss()(y_hat,y)
+            autoencoder_loss = recon_loss
+        
+        if self.hidden_classification:
+            preds,classifier_loss = self.classifier((sample,label))
+        else:
+            preds,classifier_loss = self.classifier((y_hat,label))
+        
+        return y_hat,autoencoder_loss + classifier_loss
 
-        if ii + 1 <= len(dataloader): # drop last
-            # load the data to memory
-            inputs      = Variable(features).to(device)
-            # one of the most important steps, reset the gradients
-            optimizer.zero_grad()
-            # compute the outputs
-            outputs,_   = net(inputs)
-            # compute the losses
-            if categorical:
-                outputs = output_activation_func(outputs.clone(),softmax_dim)
-                labels  = torch.stack([labels,1- labels]).T
+def train_loop(model,dataloader,optimizer,classification = False,device = 'cpu',ii_epoch = None,print_train = False):
+    model.train()
+    torch.set_grad_enabled(True)
+    train_loss = 0.
+    for ii,data_tuple in enumerate(dataloader):
+        # reset the gradients in the optimizer
+        optimizer.zero_grad()
+        
+        if classification:
+            inputs,outputs,labels = data_tuple
+            labels = Variable(labels).to(device)
+        else:
+            inputs,outputs = data_tuple
+#        inputs = inputs.view(-1,inputs.shape[-1])
+        inputs = Variable(inputs).to(device)
+        outputs = Variable(outputs).to(device)
+        
+        if classification:
+            out_hat,loss = model((inputs,outputs,labels))
+        else:
+            out_hat,loss = model((inputs,outputs))
+        loss = loss.mean()
+        loss.backward()
+        
+        optimizer.step()
+        train_loss  += loss.data
+        if print_train:
+            print(f'{ii + 1:3.0f}/{100*(ii+1)/ len(dataloader):2.3f}%,loss = {train_loss/(ii+1):.6f}')
+    else:
+        print(f'epoch {ii_epoch + 1}, train loss = {train_loss/(ii+1):.6f}')
+    return train_loss / (ii + 1)
+
+def validation_loop(model,dataloader,classification = False,device = 'cpu',ii_epoch = None):
+    model.eval()
+    with torch.no_grad():
+        validation_loss = 0.
+        for ii,data_tuple in enumerate(dataloader):
+            
+            if classification:
+                inputs,outputs,labels = data_tuple
+                labels = Variable(labels).to(device)
             else:
-                outputs = output_activation_func(outputs.clone())
-            
-            loss_batch  = loss_func(outputs.to(device),labels.view(outputs.shape).to(device))
-            """
-            # add L2 loss to the weights
-            if l2_lambda > 0:
-                weight_norm = torch.norm(list(net.parameters())[-4],2)
-                loss_batch  += l2_lambda * weight_norm
-            # add L1 loss to the weights
-            if l1_lambda > 0:
-                weight_norm = torch.norm(list(net.parameters())[-4],1)
-                loss_batch  += l1_lambda * weight_norm
-            """
-            # backpropagation
-            loss_batch.backward()
-            # modify the weights
-            optimizer.step()
-            # record the training loss of a mini-batch
-            train_loss  += loss_batch.data
-            if print_train:
-                iterator.set_description(f'epoch {idx_epoch+1}-{ii + 1:3.0f}/{100*(ii+1)/len(dataloader):2.3f}%,loss = {train_loss/(ii+1):.6f}')
-                
-    return train_loss/(ii+1)
+                inputs,outputs = data_tuple
+#            inputs = inputs.view(-1,inputs.shape[-1])
+            inputs = Variable(inputs).to(device)
+            outputs = Variable(outputs).to(device)
+            if classification:
+                out_hat,loss = model((inputs,outputs,labels))
+            else:
+                out_hat,loss = model((inputs,outputs))
+            loss = loss.mean()
+            validation_loss  += loss.data
+        print(f'epoch {ii_epoch + 1}, valid loss = {validation_loss / (ii + 1):.6f}')
+    return validation_loss / (ii + 1)
 
-def validation_loop(net,
-                    loss_func,
-                    dataloader,
-                    device,
-                    categorical = True,
-                    output_activation = 'softmax',
-                    verbose = 0,
-                    ):
-    """
-    net:nn.Module, torch model object
-    loss_func:nn.Module, loss function
-    dataloader:torch.data.DataLoader
-    device:str or torch.device
-    categorical:Boolean, whether to one-hot labels
-    output_activation:string, calling the activation function from an inner dictionary
-
-    """
-    from tqdm import tqdm
-    probability_func        = probability_func_dict[output_activation]
-    output_activation_func  = output_act_func_dict[output_activation]
-    # specify the gradient being frozen and dropout etc layers will be turned off
-    net.to(device).eval()
-    with no_grad():
-        valid_loss      = 0.
-        y_pred          = []
-        y_true          = []
-        features,labels = [],[]
-        if verbose == 0:
-            iterator = enumerate(dataloader)
+def train_validation_block(max_epochs,
+                           model,
+                           dataloader,
+                           optimizer,
+                           device = 'cpu',
+                           classification = True,
+                           model_saving_name = 'best.path',
+                           ):
+    # data placeholder for the train-validation losses
+    res                             = torch.zeros((2,max_epochs))
+    best_valid_loss                 = np.inf
+    count                           = 0
+    for epoch in range(max_epochs):
+        # train cycle
+        train_loss                  =       train_loop(model,
+                                                       dataloader,
+                                                       classification   = classification,
+                                                       optimizer        = optimizer,
+                                                       device           = device,
+                                                       ii_epoch         = epoch)
+        # validation cycle
+        valid_loss                  =       validation_loop(model,
+                                                            dataloader,
+                                                            classification  = classification,
+                                                            device          = device,
+                                                            ii_epoch        = epoch)
+        res[0,epoch]                = train_loss
+        res[1,epoch]                = valid_loss
+        print()
+        # detemining stopping criteria
+        temp                        = valid_loss.detach().cpu().numpy()
+        if best_valid_loss > temp:
+            best_valid_loss         = temp
+            count                   = 0
+            # save the best model
+            torch.save(model.state_dict(),model_saving_name)
         else:
-            iterator        = tqdm(enumerate(dataloader))
-        for ii,(batch_features,batch_labels) in iterator:
-            if "Binary Cross Entropy" in loss_func.__doc__:
-                batch_labels = batch_labels.float()
-            batch_labels.to(device)
-            if ii + 1 <= len(dataloader):
-                # load the data to memory
-                inputs      = Variable(batch_features).to(device)
-                # compute the outputs
-                outputs,feature_   = net(inputs)
-                # activation function for outputs
-                if categorical:
-                    y_pred.append(probability_func(outputs.clone(),softmax_dim))
-                    outputs         = output_activation_func(outputs.clone(),softmax_dim)
-                    batch_labels    = torch.stack([batch_labels,1- batch_labels]).T
-                else:
-                    y_pred.append(probability_func(outputs.clone()))
-                    outputs         = output_activation_func(outputs.clone())
-                # compute the losses
-                loss_batch  = loss_func(outputs.to(device),batch_labels.view(outputs.shape).to(device))
-                # record the validation loss of a mini-batch
-                valid_loss  += loss_batch.data
-                denominator = ii
-
-                y_true.append(batch_labels)
-                features.append(feature_)
-                labels.append(batch_labels)
-        valid_loss = valid_loss / (denominator + 1)
-    return valid_loss,y_pred,y_true,features,labels
-
-def validation_loop_with_path(net,
-                              pretrain_model_name,
-                              loss_func,
-                              dataloader,
-                              device,
-                              categorical = True,
-                              output_activation = 'softmax',
-                              ):
-    """
-    net:nn.Module, torch model object
-    loss_func:nn.Module, loss function
-    dataloader:torch.data.DataLoader
-    device:str or torch.device
-    categorical:Boolean, whether to one-hot labels
-    output_activation:string, calling the activation function from an inner dictionary
-
-    """
-    # from tqdm import tqdm
-    probability_func        = probability_func_dict[output_activation]
-    output_activation_func  = output_act_func_dict[output_activation]
-    # specify the gradient being frozen and dropout etc layers will be turned off
-    net.to(device).eval()
-    with no_grad():
-        valid_loss      = 0.
-        y_pred          = []
-        y_true          = []
-        features,labels,item = [],[],[]
-        for ii,(batch_features,batch_labels,batch_path) in enumerate(dataloader):
-            item.append([item.split('/')[-1].split('.')[0] for item in batch_path])
-            if "Binary Cross Entropy" in loss_func.__doc__:
-                batch_labels = batch_labels.float()
-            batch_labels.to(device)
-            if ii + 1 <= len(dataloader):
-                # load the data to memory
-                inputs      = Variable(batch_features).to(device)
-                # compute the outputs
-                outputs,feature_   = net(inputs)
-                # activation function for outputs
-                if categorical:
-                    y_pred.append(probability_func(outputs.clone(),softmax_dim))
-                    outputs         = output_activation_func(outputs.clone(),softmax_dim)
-                    batch_labels    = torch.stack([batch_labels,1- batch_labels]).T
-                else:
-                    y_pred.append(probability_func(outputs.clone()))
-                    outputs         = output_activation_func(outputs.clone())
-                # compute the losses
-                loss_batch  = loss_func(outputs.to(device),batch_labels.view(outputs.shape).to(device))
-                # record the validation loss of a mini-batch
-                valid_loss  += loss_batch.data
-                denominator = ii
-
-                y_true.append(batch_labels)
-                features.append(feature_)
-                labels.append(batch_labels)
-        valid_loss = valid_loss / (denominator + 1)
-    return valid_loss,y_pred,y_true,features,labels,item
-
-def train_and_validation(
-        model_to_train,
-        f_name,
-        output_activation,
-        loss_func,
-        optimizer,
-        image_resize = 128,
-        device = 'cpu',
-        batch_size = 8,
-        n_epochs = int(3e3),
-        print_train = True,
-        patience = 5,
-        train_root = '',
-        valid_root = '',
-        n_noise = 0,
-        noise_level = None,):
-    """
-    This function is to train a new CNN model on clear images
-    
-    The training and validation processes should be modified accordingly if 
-    new modules (i.e., a secondary network) are added to the model
-    
-    Arguments
-    ---------------
-    model_to_train:torch.nn.Module, a nn.Module class
-    f_name:string, the name of the model that is to be trained
-    output_activation:torch.nn.activation, the activation function that is used
-        to apply non-linearity to the output layer
-    loss_func:torch.nn.modules.loss, loss function
-    optimizer:torch.optim, optimizer
-    image_resize:int, default = 128, the number of pixels per axis for the image
-        to be resized to
-    device:string or torch.device, default = "cpu", where to train model
-    batch_size:int, default = 8, batch size
-    n_epochs:int, default = int(3e3), the maximum number of epochs for training
-    print_train:bool, default = True, whether to show verbose information
-    patience:int, default = 5, the number of epochs the model is continuely trained
-        when the validation loss does not change
-    train_root:string, default = '', the directory of data for training
-    valid_root:string, default = '', the directory of data for validation
-    
-    Output
-    -----------------
-    model_to_train:torch.nn.Module, a nn.Module class
-    """
-    if output_activation   == 'softmax':
-        categorical         = True
-    elif output_activation == 'sigmoid':
-        categorical         = False
-    augmentations = {
-            'train':simple_augmentations(image_resize,noise_level = noise_level),
-            'valid':simple_augmentations(image_resize,noise_level = noise_level),
-        }
-    
-    train_loader        = data_loader(
-            train_root,
-            augmentations   = augmentations['train'],
-            batch_size      = batch_size,
-            )
-    valid_loader        = data_loader(
-            valid_root,
-            augmentations   = augmentations['valid'],
-            batch_size      = batch_size,
-            )
-    
-    
-    model_to_train.to(device)
-    model_parameters    = filter(lambda p: p.requires_grad, model_to_train.parameters())
-    if print_train:
-        params          = sum([np.prod(p.size()) for p in model_parameters])
-        print(f'total params: {params:d}')
-    
-    best_valid_loss     = torch.tensor(float('inf'),dtype = torch.float64)
-    losses = []
-    for idx_epoch in range(n_epochs):
-        # train
-        print('\ntraining ...')
-        _               = train_loop(
-        net                 = model_to_train,
-        loss_func           = loss_func,
-        optimizer           = optimizer,
-        dataloader          = train_loader,
-        device              = device,
-        categorical         = categorical,
-        idx_epoch           = idx_epoch,
-        print_train         = print_train,
-        output_activation   = output_activation,
-        n_noise             = n_noise,
-        )
-        print('\nvalidating ...')
-        valid_loss,y_pred,y_true,features,labels= validation_loop(
-        net                 = model_to_train,
-        loss_func           = loss_func,
-        dataloader          = valid_loader,
-        device              = device,
-        categorical         = categorical,
-        output_activation   = output_activation,
-        )
-        y_pred = torch.cat(y_pred)
-        y_true = torch.cat(y_true)
-        score = metrics.roc_auc_score(y_true.detach().cpu(),y_pred.detach().cpu())
-        print(f'\nepoch {idx_epoch + 1}, loss = {valid_loss:6f},score = {score:.4f}')
-        if valid_loss.cpu().clone().detach().type(torch.float64) < best_valid_loss:
-            best_valid_loss = valid_loss.cpu().clone().detach().type(torch.float64)
-            torch.save(model_to_train,f_name)
-        else:
-            model_to_train = torch.load(f_name)
-        losses.append(best_valid_loss)
-    
-        if (len(losses) > patience) and (len(set(losses[-patience:])) == 1):
+            count += 1
+        
+        if count >= 50:
+            model.load_state_dict(torch.load(model_saving_name))
             break
-    return model_to_train
-
-def resample_behavioral_estimate(y_true,y_pred,n_sampling = int(1e3),shuffle = False):
-    from joblib import Parallel,delayed
-    def _temp_func(idx_picked,shuffle = shuffle):
-        if shuffle:
-            _y_pred = sk_shuffle(y_pred)
-            score = metrics.roc_auc_score(y_true[idx_picked],_y_pred[idx_picked])
-
-        else:
-            score = metrics.roc_auc_score(y_true[idx_picked],y_pred[idx_picked])
-        return score
-    scores = Parallel(n_jobs = -1,verbose = 0)(delayed(_temp_func)(**{
-        'idx_picked':np.random.choice(y_true.shape[0],y_true.shape[0],replace = True),
-        'shuffle':shuffle}) for _ in range(n_sampling))
-    
-    return scores
-
-def behavioral_evaluate(net,
-                        n_experiment_runs,
-                        loss_func,
-                        dataloader,
-                        device,
-                        categorical = True,
-                        output_activation = 'softmax',
-                        verbose = 0,
-                        ):
-    """
-    This function evaluates the trained network with given dataloader (could be noisy) for
-    a few blocks (like an experiment blocks). The performance of the network is estimated
-    by the average of the blocks
-
-    Inputs
-    ----------------
-    net: nn.Module, the trained network
-    n_experiment_runs: int, number of blocks of evaluating the network
-    loss_func: torch.nn, loss function
-    dataloader: torch.utils.dataset, a dataloader with agumentation procedures
-    device: torch.device, where to put the network and the data
-    categorical: Boolean, corresponding to the output layer and activation
-    output_activation: String, the name of the output activation function, it is used to called the torch function
-    
-
-    Outputs
-    -----------------
-    y_trues: list of torch.tensors
-    y_preds: list of torch.tensors
-    scores: list of float
-    features: list of torch.autograd.Variables
-    labels: list of torch.tensors
-    """
-    
-    y_preds,y_trues = [],[]
-    features,labels = [],[]
-    for n_run in range(n_experiment_runs):
-        _,y_pred,y_true,_features,_labels       = validation_loop(
-                            net,
-                            loss_func,
-                            dataloader          = dataloader,
-                            device              = device,
-                            categorical         = categorical,
-                            output_activation   = output_activation,
-                            verbose             = verbose,
-                            )
-        y_preds.append(torch.cat(y_pred).detach().cpu())
-        y_trues.append(torch.cat(y_true).detach().cpu())
-        features.append(_features)
-        labels.append(_labels)
-    yy_trues = torch.cat(y_trues).detach().cpu().numpy()
-    yy_preds = torch.cat(y_preds).detach().cpu().numpy()
-    
-    return yy_trues,yy_preds,features,labels
-
-def behavioral_evaluate_with_path(net,
-                        n_experiment_runs,
-                        loss_func,
-                        dataloader,
-                        device,
-                        categorical = True,
-                        output_activation = 'softmax',
-                        image_type = 'clear',
-                        small_dataset = True,
-                        ):
-    """
-    This function evaluates the trained network with given dataloader (could be noisy) for
-    a few blocks (like an experiment blocks). The performance of the network is estimated
-    by the average of the blocks
-
-    Inputs
-    ----------------
-    net: nn.Module, the trained network
-    n_experiment_runs: int, number of blocks of evaluating the network
-    loss_func: torch.nn, loss function
-    dataloader: torch.utils.dataset, a dataloader with agumentation procedures
-    device: torch.device, where to put the network and the data
-    categorical: Boolean, corresponding to the output layer and activation
-    output_activation: String, the name of the output activation function, it is used to called the torch function
-    image_type: for printing the information
-    small_dataset: Boolean, not functional
-
-    Outputs
-    -----------------
-    y_trues: list of torch.tensors
-    y_preds: list of torch.tensors
-    scores: list of float
-    features: list of torch.autograd.Variables
-    labels: list of torch.tensors
-    """
-    from tqdm import tqdm
-    if len(dataloader) > 100: # when the validation data is large
-        small_dataset   = False
-    # when the validation data is small
-    if small_dataset:
-        y_preds,y_trues = [],[]
-        features,labels = [],[]
-        items = []
-        for n_run in tqdm(range(n_experiment_runs)):
-            _,y_pred,y_true,_features,_labels,_items= validation_loop_with_path(
-                                net,
-                                loss_func,
-                                dataloader          = dataloader,
-                                device              = device,
-                                categorical         = categorical,
-                                output_activation   = output_activation,
-                                )
-            y_preds.append(torch.cat(y_pred).detach().cpu())
-            y_trues.append(torch.cat(y_true).detach().cpu())
-            features.append(_features)
-            labels.append(_labels)
-            items.append(_items)
-        yy_trues = torch.cat(y_trues).detach().cpu().numpy()
-        yy_preds = torch.cat(y_preds).detach().cpu().numpy()
-
-        scores = resample_behavioral_estimate(yy_trues,yy_preds)
-
-        if categorical:
-            confidence = torch.cat(y_preds).cpu().numpy().max(1)
-        else:
-            temp = torch.cat(y_preds).cpu().numpy()
-            temp[temp < 0.5] = 1- temp[temp < 0.5]
-            confidence = temp.copy()
-
-        print(f'\nwith {image_type} images, score = {np.mean(scores):.4f}+/-{np.std(scores):.4f},confidence = {np.mean(confidence):.2f}+/-{np.std(confidence):.2f}')
-
-        return y_trues,y_preds,scores,features,labels,items
-    else:
-        _,y_pred,y_true,features,labels = validation_loop(
-                                net,
-                                loss_func,
-                                dataloader = dataloader,
-                                device = device,
-                                categorical = categorical,
-                                output_activation = output_activation,
-                                )
-        scores = np.zeros(n_experiment_runs)
-        for jj in range(n_experiment_runs):
-            idx_ = np.random.choice(y_true.shape[0],size = int(y_true.shape[0]),replace = True)
-            y_pred_,y_true_ = y_pred[idx_],y_true[idx_]
-            score = metrics.roc_auc_score(y_true_,y_pred_)
-            scores[jj] = score
-        print(f'\nwith {image_type} images, score = {np.mean(scores):.4f}+/-{np.std(scores):.4f}')
-        return y_trues,y_preds,scores,features,labels
-    
-
-
-def make_decoder(decoder_name,n_jobs = 1,):
-    """
-    Make decoders for the hidden representations
-
-    Inputs
-    ---------------
-    decoder_name: String, to call the dictionary
-    n_jobs: int, parallel argument
-    """
-    np.random.seed(12345)
-    from sklearn.decomposition import PCA
-    # linear SVM
-    lsvm = LinearSVC(penalty        = 'l2', # default
-                     dual           = True, # default
-                     tol            = 1e-3, # not default
-                     random_state   = 12345, # not default
-                     max_iter       = int(1e3), # default
-                     class_weight   = 'balanced', # not default
-                     )
-    # to make the probabilistic predictions from the SVM
-    lsvm = CalibratedClassifierCV(
-                     base_estimator = lsvm,
-                     method         = 'sigmoid',
-                     cv             = 8,
-                     )
-
-    # RBF SVM
-    svm = SVC(
-                     tol            = 1e-3,
-                     random_state   = 12345,
-                     max_iter       = int(1e3),
-                     class_weight   = 'balanced',
-                     )
-    # to make the probabilistic predictions from the SVM
-    svm = CalibratedClassifierCV(
-                     base_estimator = svm,
-                     method         = 'sigmoid',
-                     cv             = 8,
-                     )
-
-    # random forest implemented by XGBoost
-    xgb = XGBClassifier(
-                     learning_rate  = 1e-3, # not default
-                     max_depth      = 10, # not default
-                     n_estimators   = 100, # not default
-                     objective      = 'binary:logistic', # default
-                     booster        = 'gbtree', # default
-                     subsample      = 0.9, # not default
-                     colsample_bytree = 0.9, # not default
-                     reg_alpha      = 0, # default
-                     reg_lambda     = 1, # default
-                     random_state   = 12345, # not default
-                     importance_type= 'gain', # default
-                     n_jobs         = n_jobs,# default to be 1
-                     )
-
-    # logistic regression
-    logitstic = LogisticRegression(random_state = 12345)
-
-    if decoder_name == 'linear-SVM':
-        decoder = make_pipeline(StandardScaler(),
-                                lsvm,
-                                )
-    elif decoder_name == 'PCA-linear-SVM':
-        decoder = make_pipeline(StandardScaler(),
-                                PCA(random_state = 12345,),
-                                lsvm,)
-    elif decoder_name == 'RBF-SVM':
-        decoder = make_pipeline(StandardScaler(),
-                                svm,
-                                )
-    elif decoder_name == 'RF':
-        decoder = make_pipeline(StandardScaler(),
-                                xgb,
-                                )
-    elif decoder_name == 'logit':
-        decoder = make_pipeline(StandardScaler(),
-                                logitstic,
-                                )
-    return decoder
-
-def decode_hidden_layer(decoder,
-                        features,
-                        labels,
-                        cv                  = None,
-                        groups              = None,
-                        n_splits            = 50,
-                        test_size           = .2,):
-    """
-    Decode the hidden layer outputs from a convolutional neural network by a scikit-learn classifier
-
-    Inputs
-    -----------------------
-    decoder: scikit-learn object
-    features: numpy narray, n_sample x n_features
-    labels: numpy narray, n_samples x 1
-    cv: scikit-learn object or None, default being sklearn.model_selection.StratifiedShuffleSplit
-    n_splits: int, number of cross validation
-    test_size: float, between 0 and 1.
-    """
-    if cv == None:
-        cv = StratifiedShuffleSplit(n_splits        = n_splits,
-                                    test_size       = test_size,
-                                    random_state    = 12345,
-                                    )
-        print(f'CV not defined, use StratifiedShuffleSplit(n_splits = {n_splits})')
-
-    res = cross_validate(decoder,
-                         features,
-                         labels,
-                         groups             = groups,
-                         cv                 = cv,
-                         scoring            = 'roc_auc',
-                         n_jobs             = -1,
-                         verbose            = 1,
-                         return_estimator   = True,
-                         )
-    # plase uncomment below and test this when you have enough computational power, i.e. parallel in more than 16 CPUs
-    pval = resample_ttest(res['test_score'],baseline = 0.5,n_permutation = int(1e4),
-                                  one_tail = True,n_jobs = -1.)
-    return res,cv,pval
-
-def resample_ttest(x,
-                   baseline         = 0.5,
-                   n_permutation    = 10000,
-                   one_tail         = False,
-                   n_jobs           = 12,
-                   verbose          = 0,
-                   full_size        = True,
-                   metric_func      = np.mean,
-                   ):
-    """
-    http://www.stat.ucla.edu/~rgould/110as02/bshypothesis.pdf
-    https://www.tau.ac.il/~saharon/StatisticsSeminar_files/Hypothesis.pdf
-    Inputs:
-    ----------
-    x: numpy array vector, the data that is to be compared
-    baseline: the single point that we compare the data with
-    n_ps: number of p values we want to estimate
-    one_tail: whether to perform one-tailed comparison
-    """
-    import numpy as np
-    # import gc
-    # from joblib import Parallel,delayed
-    # statistics with the original data distribution
-    t_experiment    = metric_func(x)
-    null            = x - metric_func(x) + baseline # shift the mean to the baseline but keep the distribution
-
-    if null.shape[0] > int(1e4): # catch for big data
-        full_size   = False
-    if not full_size:
-        size        = (int(1e3),n_permutation)
-    else:
-        size = (null.shape[0],n_permutation)
-    
-    null_dist = np.random.choice(null,size = size,replace = True)
-    t_null = metric_func(null_dist,0)
-    
-    if one_tail:
-        return ((np.sum(t_null >= t_experiment)) + 1) / (size[1] + 1)
-    else:
-        return ((np.sum(np.abs(t_null) >= np.abs(t_experiment))) + 1) / (size[1] + 1) /2
-
-    
-def resample_ttest_2sample(a,b,
-                           n_permutation        = 10000,
-                           one_tail             = False,
-                           match_sample_size    = True,
-                           n_jobs               = 6,
-                           verbose              = 0):
-    from joblib import Parallel,delayed
-    import gc
-    # when the samples are dependent just simply test the pairwise difference against 0
-    # which is a one sample comparison problem
-    if match_sample_size:
-        difference  = a - b
-        ps          = resample_ttest(difference,
-                                     baseline       = 0,
-                                     n_permutation  = n_permutation,
-                                     one_tail       = one_tail,
-                                     n_jobs         = n_jobs,
-                                     verbose        = verbose,)
-        return ps
-    else: # when the samples are independent
-        t_experiment        = np.mean(a) - np.mean(b)
-        if not one_tail:
-            t_experiment    = np.abs(t_experiment)
-        def t_statistics(a,b):
-            group           = np.concatenate([a,b])
-            np.random.shuffle(group)
-            new_a           = group[:a.shape[0]]
-            new_b           = group[a.shape[0]:]
-            t_null          = np.mean(new_a) - np.mean(new_b)
-            if not one_tail:
-                t_null      = np.abs(t_null)
-            return t_null
-        try:
-           gc.collect()
-           t_null_null = Parallel(n_jobs = n_jobs,verbose = verbose)(delayed(t_statistics)(**{
-                            'a':a,
-                            'b':b}) for i in range(n_permutation))
-        except:
-            t_null_null = np.zeros(n_permutation)
-            for ii in range(n_permutation):
-                t_null_null = t_statistics(a,b)
-        if one_tail:
-            ps = ((np.sum(t_null_null >= t_experiment)) + 1) / (n_permutation + 1)
-        else:
-            ps = ((np.sum(np.abs(t_null_null) >= np.abs(t_experiment))) + 1) / (n_permutation + 1) / 2
-        return ps
-
-def Find_Optimal_Cutoff(target, predicted):
-    """ Find the optimal probability cutoff point for a classification model related to event rate
-    Parameters
-    ----------
-    target : Matrix with dependent or target data, where rows are observations
-    predicted : Matrix with predicted data, where rows are observations
-    Returns
-    -------
-    list type, with optimal cutoff value
-
-    """
-    from sklearn.metrics import roc_curve
-    fpr, tpr, threshold         = roc_curve(target, predicted)
-    i                           = np.arange(len(tpr))
-    roc                         = pd.DataFrame({'tf' : pd.Series(tpr-(1-fpr), index=i), 'threshold' : pd.Series(threshold, index=i)})
-    roc_t                       = roc.iloc[(roc.tf-0).abs().argsort()[:1]]
-
-    return list(roc_t['threshold']) 
-
-def decode_and_visualize_hidden_representations(fig,axes,
-                                                y_true,y_pred,features,
-                                                hidden_units = 2,
-                                                return_estimator = False):
-    # visualize the hidden representations
-    import gc
-    import seaborn as sns
-    if len(y_true.shape) == 2:
-        y_true = y_true[:,-1]
-        y_pred = y_pred[:,-1]
-    if hidden_units == 2: # when we don't need to PCA for visualization
-        thr = Find_Optimal_Cutoff(y_true,y_pred)
-        print(metrics.classification_report(y_true,y_pred>=thr[0]))
-        ax = axes.flatten()[0]
-        sns.scatterplot(x = features[:,0], y = features[:,1],hue = y_true,ax = ax,)
-        ax.set(xlabel = 'feature 1',
-               ylabel = 'feature 2',
-               title = f'hidden representations,CNN = {metrics.roc_auc_score(y_true,y_pred):.4f}',)
-        
-        gc.collect()
-        svm = make_decoder('linear-SVM')
-        X,y = features.copy(),y_true.copy()
-        cv = StratifiedShuffleSplit(n_splits = 300, test_size = 0.2, random_state = 12345)
-        res = cross_validate(svm,X,y, cv = cv,scoring = 'roc_auc',n_jobs = -1, verbose = 0)
-        gc.collect()
-        ax = axes.flatten()[-1]
-        ax.hist(res['test_score'])
-        ax.set(title = 'decoding scores from decoding the hidden layer')
-    else:
-        features_pca = PCA(n_components = 2,random_state = 12345).fit_transform(features)
-        thr = Find_Optimal_Cutoff(y_true,y_pred)
-        print(metrics.classification_report(y_true,y_pred>=thr[0]))
-        ax = axes.flatten()[0]
-        sns.scatterplot(x = features_pca[:,0], y = features_pca[:,1],hue = y_true,ax = ax,)
-        ax.set(xlabel = 'PC 1',
-               ylabel = 'PC 2',
-               title = f'PCA of hidden representations,CNN = {metrics.roc_auc_score(y_true,y_pred):.4f}',)
-        
-        gc.collect()
-        svm = make_decoder('linear-SVM')
-        X,y = features.copy(),y_true.copy()
-        cv = StratifiedShuffleSplit(n_splits = 300, test_size = 0.2, random_state = 12345)
-        res = cross_validate(svm,X,y, cv = cv,scoring = 'roc_auc',n_jobs = -1, verbose = 0)
-        gc.collect()
-        ax = axes.flatten()[-1]
-        ax.hist(res['test_score'])
-        ax.set(title = 'decoding scores from decoding the hidden layer')
-    if return_estimator:
-        svm.fit(X,y)
-        return fig,svm
-    else:
-        return fig
+'''
