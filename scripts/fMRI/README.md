@@ -1,6 +1,6 @@
 # fMRI data analysis
 
-## Signal processing from scanner
+## Signal processing from scanner - [a detailed description of the preprocessing pipeline](https://github.com/nmningmei/preprocessing_pipelines/blob/master/FSL_vs_nipype_fsl_preprocessing.ipynb)
 0. [`0.preprocess fmri.py`](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/0.preprocess%20fmri.py) is used for removing motion noise and smoothing for each run.
 1. And then we use [`1.ICA_AROMA.py`](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/1.ICA_AROMA.py) to apply ICA AROMA to further denoising.
 2. In parallel, we use [`2.freesurfer reconall.py`](https://github.com/nmningmei/unconfeats/blob/main/scripts/fMRI/nipype_preprocessing_pipeline/2.freesurfer%20reconall.py) to generate the brain model using Freesurfer.
