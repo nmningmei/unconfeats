@@ -14,7 +14,7 @@ import seaborn as sns
 from utils_deep import hidden_activation_functions
 from matplotlib import pyplot as plt
 
-sns.set_style('whitegrid')
+sns.set_style('white')
 sns.set_context('poster')
 
 working_dir = '../results/first_layer'

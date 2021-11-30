@@ -128,12 +128,12 @@ with open(f'{scripts_folder}/qsub_jobs.py','a') as f:
             f.write(f'time.sleep(0.1)\nos.system("{line}")\n')
     f.close()
 
-from glob import glob
-all_scripts = glob(os.path.join(scripts_folder,'simulation*.py'))
-
-with open(os.path.join(scripts_folder,'run_all.py'),'w') as f:
-    f.write('import os\n')
-    for files in all_scripts:
-        file_name = files.split('bash/')[-1]
-        f.write(f'os.system("python {file_name}")\n')
-    f.close()
+#from glob import glob
+#all_scripts = glob(os.path.join(scripts_folder,'simulation*.py'))
+#
+#with open(os.path.join(scripts_folder,'run_all.py'),'w') as f:
+#    f.write('import os\n')
+#    for files in all_scripts:
+#        file_name = files.split('bash/')[-1]
+#        f.write(f'os.system("python {file_name}")\n')
+#    f.close()

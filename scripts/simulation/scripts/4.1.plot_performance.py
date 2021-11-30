@@ -18,24 +18,25 @@ import numpy   as np
 import seaborn as sns
 
 import matplotlib
-# matplotlib.pyplot.switch_backend('agg')
+matplotlib.pyplot.switch_backend('agg')
 
 from matplotlib import pyplot as plt
 from matplotlib.patches import Patch
 
-sns.set_style('whitegrid')
-sns.set_context('poster',font_scale = 1.5)
-from matplotlib import rc
-rc('font',weight = 'bold')
-plt.rcParams['axes.labelsize'] = 45
-plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['axes.titlesize'] = 45
-plt.rcParams['axes.titleweight'] = 'bold'
-plt.rcParams['ytick.labelsize'] = 32
-plt.rcParams['xtick.labelsize'] = 32
+sns.set_style('white')
+sns.set_context('paper',font_scale=2)
+# from matplotlib import rc
+# rc('font',weight = 'bold')
+# plt.rcParams['axes.labelsize'] = 45
+# plt.rcParams['axes.labelweight'] = 'bold'
+# plt.rcParams['axes.titlesize'] = 45
+# plt.rcParams['axes.titleweight'] = 'bold'
+# plt.rcParams['ytick.labelsize'] = 32
+# plt.rcParams['xtick.labelsize'] = 32
 
 working_dir     = '../../another_git/agent_models/results'
 figure_dir      = '../figures'
+collect_dir     = '/export/home/nmei/nmei/properties_of_unconscious_processing/all_figures'
 marker_factor   = 10
 marker_type     = ['8','s','p','*','+','D','o']
 alpha_level     = .75
@@ -47,6 +48,11 @@ working_data = glob(os.path.join(working_dir,'*','*.csv'))
 
 paper_dir = '/export/home/nmei/nmei/properties_of_unconscious_processing/figures'
 
+def simpleaxes(ax):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.tick_params(axis = 'x',direction = 'in')
+    ax.tick_params(axis = 'y',direction = 'out')
 
 df              = []
 for f in working_data:
@@ -79,7 +85,7 @@ print(df['x'].values)
 
 df['x']             = df['x'].apply(lambda x: [x + np.random.normal(0,0.1,size = 1)][0][0])
 df                  = df.sort_values(['hidden_activation','output_activation'])
-df['activations']   = df['hidden_activation'] + '_' +  df['output_activation']
+df['activations']   = df['hidden_activation'] + '-' +  df['output_activation']
 
 idxs            = np.logical_or(df['model'] == 'CNN',df['model'] == 'linear-SVM')
 df_plot         = df.loc[idxs,:]
@@ -97,7 +103,8 @@ g               = sns.relplot(
                 alpha       = alpha_level,
                 data        = df_plot,
                 facet_kws   = {'gridspec_kws':{"wspace":0.2}},
-                aspect      = 3,
+                aspect      = 2,
+                height      = 2,
                 )
 [ax.axhline(0.5,
             linestyle       = '--',
@@ -108,9 +115,18 @@ g               = sns.relplot(
 [ax.set(xticks = [0,n_noise_levels],
         xticklabels = [0,noise_levels.max()]
         ) for ax in g.axes.flatten()]
+[simpleaxes(ax) for ax in g.axes.flatten()]
 
-(g.set_axis_labels('Noise Level','ROC AUC')
-  .set_titles('{col_name} {row_name}'))
+(g.set_axis_labels('Noise level','ROC AUC')
+   .set_titles('')
+  .set(ylim = (0,1.01)))
+for ax_title,ax in zip(['AlexNet','Vgg19','MobileNet','DenseNet','ResNet50',],
+                       g.axes[0,:]):
+    ax.set(title = ax_title)
+for ax_label,ax in zip(np.sort(np.unique(df['activations'])),
+                       g.axes[:,0]):
+    ax.annotate(ax_label.replace('-',r' $\rightarrow$ '),
+                xy = (0.2,0.25),)
 handles, labels             = g.axes[0][0].get_legend_handles_labels()
 temp = []
 for item in labels:
@@ -126,20 +142,26 @@ handles[2]                  = Patch(facecolor = 'blue',)
 g._legend.remove()
 g.fig.legend(handles,
              labels,
-             loc            = "center right",
-             borderaxespad  = 0.1)
-g.savefig(os.path.join(figure_dir,'CNN_performance.jpeg'),
-          dpi               = 300,
-          bbox_inches       = 'tight')
-g.savefig(os.path.join(figure_dir,'CNN_performance (light).jpeg'),
-#          dpi = 300,
-          bbox_inches       = 'tight')
-g.savefig(os.path.join(paper_dir,'CNN_performance.jpeg'),
-          dpi               = 300,
-          bbox_inches       = 'tight')
-g.savefig(os.path.join(paper_dir,'CNN_performance_light.jpeg'),
-#          dpi               = 300,
-          bbox_inches       = 'tight')
+             loc            = 'center right',
+             bbox_to_anchor = (1.05,0.5))
+# g.savefig(os.path.join(figure_dir,'CNN_performance.jpeg'),
+#           dpi               = 300,
+#           bbox_inches       = 'tight')
+# g.savefig(os.path.join(figure_dir,'CNN_performance (light).jpeg'),
+# #          dpi = 300,
+#           bbox_inches       = 'tight')
+# g.savefig(os.path.join(paper_dir,'CNN_performance.jpeg'),
+#           dpi               = 300,
+#           bbox_inches       = 'tight')
+# g.savefig(os.path.join(paper_dir,'CNN_performance_light.jpeg'),
+# #          dpi               = 300,
+#           bbox_inches       = 'tight')
+g.savefig(os.path.join(collect_dir,'figure4.pdf'),
+            dpi = 300,
+          bbox_inches = 'tight')
+g.savefig(os.path.join(collect_dir,'figure4.png'),
+          bbox_inches = 'tight')
+
 
 # plot the decoding when CNN failed
 idxs            = np.logical_or(df['model'] == 'CNN',df['model'] == 'linear-SVM')
@@ -206,15 +228,19 @@ g                               = sns.relplot(
                 alpha           = alpha_level,
                 data            = df_plot,
                 palette         = sns.color_palette("bright")[:k],
-                height          = 8,
-                aspect          = 4,
+                height          = 4,
+                aspect          = 2,
                 )
-(g.set_axis_labels('Noise Level','ROC AUC')
-  .set_titles('{row_name}')
-  .set(xlim = (-0.1,50.5)))
+(g.set_axis_labels('Noise level','ROC AUC')
+  .set_titles('')
+  .set(xlim = (-0.1,50.5),ylim = (0,.8)))
 [ax.set(xticks = [0,n_noise_levels],
         xticklabels = [0,noise_levels.max()]
         ) for ax in g.axes.flatten()]
+[simpleaxes(ax) for ax in g.axes.flatten()]
+for ax_title,ax in zip(['AlexNet','Vgg19','MobileNet','DenseNet','ResNet50',],
+                       g.axes.flatten()):
+    ax.set(title = ax_title)
 [ax.axhline(0.5,
             linestyle           = '--',
             color               = 'black',
@@ -227,18 +253,18 @@ g                               = sns.relplot(
             alpha               = 1.,
             lw                  = 1,
             ) for ax in g.axes.flatten()]
-[ax.text(bins[1] - 0.7,
-         0.67,
-         'Low noise',
-         rotation = 90, 
-         va = 'center',
-         ) for ax in g.axes.flatten()[:1]]
-[ax.text(bins[1] + 0.1,
-         0.67,
-         'High noise',
-         rotation = 270, 
-         va = 'center',
-         ) for ax in g.axes.flatten()[:1]]
+# [ax.text(bins[1] - 1.6,
+#          0.2,
+#          'Low noise',
+#          rotation = 90, 
+#          va = 'center',
+#          ) for ax in g.axes.flatten()[:1]]
+# [ax.text(bins[1] + 0.2,
+#          0.2,
+#          'High noise',
+#          rotation = 270, 
+#          va = 'center',
+#          ) for ax in g.axes.flatten()[:1]]
 
 temp = []
 for model_name,ax in zip(['alexnet','vgg19','mobilenet','densenet','resnet',],g.axes.flatten()):
@@ -252,7 +278,7 @@ for model_name,ax in zip(['alexnet','vgg19','mobilenet','densenet','resnet',],g.
     
     # ax.axvline(bins[1],linestyle = '--' ,color = 'black', alpha = 0.6)
     
-    tiny_ax = ax.inset_axes([.6,.6,.3,.3])
+    tiny_ax = ax.inset_axes([.7,.2,.3,.3])
     tiny_ax = sns.barplot(x = 'groups',
                           order = ['low','high'],
                           y = 'proportion',
@@ -264,9 +290,11 @@ for model_name,ax in zip(['alexnet','vgg19','mobilenet','densenet','resnet',],g.
                           )
     # tiny_ax.set(xticklabels = ['low','medium','high'],
     tiny_ax.set_xlabel('Noise level',fontsize = 18)
-    tiny_ax.set_ylabel('Decoding rate',fontsize = 18)
+    tiny_ax.set_ylabel('Proportion',fontsize = 18)
+    tiny_ax.set(ylim = (0,1))
     tiny_handles,tiny_labels = tiny_ax.get_legend_handles_labels()
     tiny_ax.get_legend().remove()
+    simpleaxes(tiny_ax)
     
 df_proportion = pd.concat(temp)
 df_proportion.to_csv(os.path.join(paper_dir.replace('figures','stats'),
@@ -289,21 +317,28 @@ for ii,color in enumerate(sns.color_palette("bright")[:k]):
 g.fig.legend(handles,
              labels,
              loc = "center right",
-             borderaxespad = 0.1)
+             bbox_to_anchor = (1.05,0.5))
 
 # g.fig.suptitle('Linear SVM decoding the hidden layers of CNNs that failed to descriminate living vs. nonliving',
 #                y = 1.02)
-g.savefig(os.path.join(figure_dir,'decoding_performance.jpeg'),
+# g.savefig(os.path.join(figure_dir,'decoding_performance.jpeg'),
+#           dpi = 300,
+#           bbox_inches = 'tight')
+# g.savefig(os.path.join(figure_dir,'decoding_performance (light).jpeg'),
+# #          dpi = 300,
+#           bbox_inches = 'tight')
+# g.savefig(os.path.join(paper_dir,'decoding_performance.jpeg'),
+#           dpi = 300,
+#           bbox_inches = 'tight')
+# g.savefig(os.path.join(paper_dir,'decoding_performance_light.jpeg'),
+# #          dpi = 300,
+#           bbox_inches = 'tight')
+# g.savefig(os.path.join(collect_dir,'decoding_performance.eps'),
+#           bbox_inches = 'tight')
+g.savefig(os.path.join(collect_dir,'figure5.pdf'),
           dpi = 300,
           bbox_inches = 'tight')
-g.savefig(os.path.join(figure_dir,'decoding_performance (light).jpeg'),
-#          dpi = 300,
-          bbox_inches = 'tight')
-g.savefig(os.path.join(paper_dir,'decoding_performance.jpeg'),
-          dpi = 300,
-          bbox_inches = 'tight')
-g.savefig(os.path.join(paper_dir,'decoding_performance_light.jpeg'),
-#          dpi = 300,
+g.savefig(os.path.join(collect_dir,'figure5.png'),
           bbox_inches = 'tight')
 
 #fig,axes = plt.subplots(figsize = (70,40),

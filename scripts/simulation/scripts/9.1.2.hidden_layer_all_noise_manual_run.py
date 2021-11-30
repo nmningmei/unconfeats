@@ -189,9 +189,14 @@ for _hidden_units in [2,5,10,20,50,100,300]:
                             index = ['living','nonliving'],columns=['living','nonliving'])
             fig,ax = plt.subplots()
             ax = sns.heatmap(dd,ax=ax,annot=True)
-            ax.set(xlabel='True labels',ylabel = 'Predicted labels',
+            ax.set(ylabel='True labels',xlabel = 'Predicted labels',
                    title = f'roc = {np.mean(behavioral_scores):.2f}')
             # print(var,np.mean(behavioral_scores))
+            
+            a = torch.linspace(0.2,.8,1000)
+            b = torch.ones(1000) * 0.5
+            c = [loss_func(ii,jj) for ii,jj in zip(a,b)]
+            plt.plot(c)
             
             
             decoder = make_decoder('linear-SVM',n_jobs = 1)

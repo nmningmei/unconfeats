@@ -11,22 +11,23 @@ import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
-sns.set_style('whitegrid')
-sns.set_context('poster',font_scale = 1.5)
+sns.set_style('white')
+sns.set_context('paper',font_scale = 2)
 from matplotlib import rc
 from matplotlib import pyplot as plt
 from matplotlib.patches import Patch
-rc('font',weight = 'bold')
-plt.rcParams['axes.labelsize'] = 45
-plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['axes.titlesize'] = 45
-plt.rcParams['axes.titleweight'] = 'bold'
-plt.rcParams['ytick.labelsize'] = 32
-plt.rcParams['xtick.labelsize'] = 32
+# rc('font',weight = 'bold')
+# plt.rcParams['axes.labelsize'] = 45
+# plt.rcParams['axes.labelweight'] = 'bold'
+# plt.rcParams['axes.titlesize'] = 45
+# plt.rcParams['axes.titleweight'] = 'bold'
+# plt.rcParams['ytick.labelsize'] = 32
+# plt.rcParams['xtick.labelsize'] = 32
 
-working_dir = '../results/first_layer_only'
+working_dir     = '../results/first_layer_only'
 figure_dir      = '../figures'
-paper_dir = '/export/home/nmei/nmei/properties_of_unconscious_processing/figures'
+collect_dir     = '/export/home/nmei/nmei/properties_of_unconscious_processing/all_figures'
+paper_dir       = '/export/home/nmei/nmei/properties_of_unconscious_processing/figures'
 marker_factor   = 10
 marker_type     = ['8','s','p','*','+','D','o']
 alpha_level     = .75
@@ -65,9 +66,6 @@ for model_name,folder_name in dict_folder.items():
 df_plot = pd.concat(dfs)
 df_chance = pd.concat(df_chance)
 
-
-
-
 df_chance_plot = df_chance[np.logical_and(df_chance['cnn_pval'] > 0.05,
                                           0.05 > df_chance['svm_first_pval'])]
 df_chance_melt_plot = pd.melt(df_chance_plot,
@@ -79,19 +77,29 @@ df_chance_melt_plot['Type'] = df_chance_melt_plot['Type'].map({'CNN':'CNN',
                                        'FIRST':'Decode first layer'})
 df_chance_melt_plot['model_name'] = df_chance_melt_plot['model_name'].map({val:key for key,val in dict_folder.items()})
 
+df_plot['model_name'] = df_plot['model_name'].map({'VGG19':'Vgg19','Resnet50':'ResNet50'})
+df_chance_melt_plot['model_name'] = df_chance_melt_plot['model_name'].map({
+    'VGG19':'Vgg19','Resnet50':'ResNet50'})
+
+def simpleaxes(ax):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.tick_params(axis = 'x',direction = 'in')
+    ax.tick_params(axis = 'y',direction = 'out')
+
 xargs = dict(x           = 'x',
              y           = 'ROC AUC',
              hue         = 'Type',
              palette     = sns.xkcd_palette(['black','blue']),
              alpha       = alpha_level,
              s           = 200)
-fig,axes = plt.subplots(figsize = (25,16),
+fig,axes = plt.subplots(figsize = (20,12),
                         nrows = 2,
                         ncols = 2,
                         sharex = False,
                         sharey = True,
                         )
-for ii,(axes_row,model_picked) in enumerate(zip(axes,['VGG19','Resnet50'])):
+for ii,(axes_row,model_picked) in enumerate(zip(axes,['Vgg19','ResNet50'])):
     df_plot_row = df_plot[df_plot['model_name'] == model_picked]
     df_chance_plot_row = df_chance_melt_plot[df_chance_melt_plot['model_name'] == model_picked]
     # left
@@ -122,8 +130,11 @@ for ii,(axes_row,model_picked) in enumerate(zip(axes,['VGG19','Resnet50'])):
         ax.set(xlabel = '')
     xticks = ax.get_xticks()
     ax.set(xticks = [0,np.max(xticks)],
-           xticklabels = [0,df_chance_melt_plot['noise_level'].max().round(3)],
-           title = model_picked)
+           xticklabels = [0,df_chance_melt_plot['noise_level'].max().round(1)],
+           title = model_picked,
+           ylim = (0,None))
+    if ii == 0:
+        ax.legend(handles,['FCNN performance','Decoding from the first layer'],loc = 'best')
     
 [ax.axhline(0.5,
             linestyle       = '--',
@@ -131,12 +142,15 @@ for ii,(axes_row,model_picked) in enumerate(zip(axes,['VGG19','Resnet50'])):
             alpha           = 1.,
             lw              = 1,
             ) for ax in axes.flatten()]
-fig.legend(handles,labels,loc = (0.65,0.8),)
+[simpleaxes(ax) for ax in axes.flatten()]
+# fig.legend(handles,labels,loc = (0.65,0.8),)
+fig.savefig(os.path.join(collect_dir,'supfigure11.eps'),
+            dpi = 300,
+            bbox_inches = 'tight')
 
-
-fig.savefig(os.path.join(paper_dir,'decoding first layer and chance level.jpg'),
-          dpi = 300,
-          bbox_inches = 'tight')
+# fig.savefig(os.path.join(paper_dir,'decoding first layer and chance level.jpg'),
+#           dpi = 300,
+#           bbox_inches = 'tight')
 
 
 
