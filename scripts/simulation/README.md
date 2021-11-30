@@ -46,8 +46,7 @@ n_experiment_runs       = 20
 n_noise_levels          = 50
 # the number of permutations to perform during the statistical inference
 n_permutations          = int(1e4)
-# we elected to add one example of only noise to the batch to make the FCNN less sensitive to noise
-(and here indicate see [Figure]() in the repository showing the drop in FCNN performance from 1 to 0.8 with little noise chance) 
+# we elected to add one example of only noise to the batch to make the FCNN less sensitive to noise (and the drop in FCNN performance from 1 to 0.8 with little noise chance). Further investigation shows that this is enssential for the experimetal setting because without the noise example, the trained FCNN model would be biased to predict only one of the classes in median to heavy noise settings, which is something we would want to avoid. 
 n_noise                 = 1
 ```
 
@@ -94,8 +93,3 @@ behavioral_evaluate(net,# the model for training - CNN layer + hidden (dense) la
                     verbose = 0,# whether to print the training progress
                     )
 ```
-## Results
-
-### Trained with one example of only noise added to the training batches
-
-### Trained with no example of only noise added to the training batches
