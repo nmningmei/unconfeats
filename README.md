@@ -1,4 +1,4 @@
-# [Mei, N. Santana, R., & Soto, D. (2021). Informative neural representations of unseen objects during higher-order processing in human brains and deep artificial networks, Bioarxiv, version 3](https://www.biorxiv.org/content/10.1101/2021.01.12.426428v3)
+# [Mei, N. Santana, R., & Soto, D. (2022). Informative neural representations of unseen objects during higher-order processing in human brains and deep artificial networks, Nature Human Behavior. https://doi.org/10.1038/s41562-021-01274-7](https://www.nature.com/articles/s41562-021-01274-7) [biorxiv](https://www.biorxiv.org/content/10.1101/2021.01.12.426428v4.abstract)
 
 ---
 # System Information
