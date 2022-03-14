@@ -26,6 +26,9 @@
 - FSL:           6.0.0
 - Freesurfer:    6.0.0
 
+# open data
+- [openneuro](https://openneuro.org/datasets/ds003927)
+
 # Main results
 
 ## MVPA as a function of awareness states
