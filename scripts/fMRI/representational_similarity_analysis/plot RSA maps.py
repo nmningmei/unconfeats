@@ -19,12 +19,14 @@ from nipype.interfaces import fsl
 from nilearn import image,plotting,input_data,datasets,surface
 from matplotlib import pyplot as plt
 
-sns.set_context('poster')
+sns.set_context('paper')
 
-radius = 3
-conscious_state = 'conscious'
+radius = 9
+conscious_state = 'unconscious'
+condict= dict(conscious=15,
+              unconscious=14,)
 average = True # true:= single map of average BOLD signal, false:= bootstrap mean
-model_names = ['ResNet50', 'VGG19']#'AlexNet', 'DenseNet169', 'MobileNetV2', 
+model_names = ['AlexNet', 'VGG19','MobileNetV2','ResNet50', 'DenseNet169',  ]
 func_brain = '../../../../data/MRI/{sub}/func/example_func.nii.gz' # use .format to add subject info
 standard_brain = '../../../../data/standard_brain/MNI152_T1_2mm_brain.nii.gz'
 transformation_dir_single = '../../../../data/MRI/{sub}/reg/example_func2standard.mat'# use .format to add subject info
@@ -41,7 +43,7 @@ figure_dir = f'../../../../figures/MRI/nilearn/RSA_searchlight_{radius}mm'
 for f in [standard_dir,figure_dir]:
     if not os.path.exists(f):
         os.mkdir(f)
-
+collect_dir = '/export/home/nmei/nmei/properties_of_unconscious_processing/all_figures'
 # putting the ready-for-plot to a dictionary
 res_for_plot = {f'sub-0{ii+1}':{model_name:None for model_name in model_names} for ii in range(7)}
 iterator = tqdm(working_data)
@@ -71,8 +73,8 @@ for filename in iterator:
     res_for_plot[subject][model_name] = os.path.join(standard_dir,to_filename)
 
 vmax = 0.1
-data = np.random.uniform(-vmax,vmax,size = (50,50))
-im = plt.imshow(data,cmap = plt.cm.coolwarm,vmin = -vmax,vmax = vmax)
+data = np.random.uniform(0,vmax,size = (30,30))
+im = plt.imshow(data,cmap = plt.cm.Reds,vmin = 0,vmax = vmax)
 subj_map = {'sub-01':'sub-01',
             'sub-03':'sub-02',
             'sub-04':'sub-03',
@@ -82,7 +84,6 @@ subj_map = {'sub-01':'sub-01',
             'sub-07':'sub-07',}
 bottom,top = 0.1,0.9
 left,right = 0.1,0.8
-
 
 # standardize
 res_for_plot = {f'sub-0{ii+1}':{model_name:None for model_name in model_names} for ii in range(7)}
@@ -117,7 +118,7 @@ for filename in iterator:
 
 plt.close('all')
 print('plotting in standard space')
-fig,axes = plt.subplots(figsize = (len(model_names)*7,7*2),
+fig,axes = plt.subplots(figsize = (len(model_names)*3,2*3),
                         nrows = 7,
                         ncols = len(model_names) * 2,
                         subplot_kw = {'projection':'3d'},
@@ -137,13 +138,15 @@ for ii,row_axes in enumerate(axes):
         
         ax_left = column_ax[0]#.inset_axes([0,0,0.5,0.5],subplot_kw = {'projection':'3d'},)
         ax_right = column_ax[1]#.inset_axes([0.5,0,0.5,0.5],subplot_kw = {'projection':'3d'},)
-        for ax,surf_mesh,bg_map,hemi,title in zip([ax_left,ax_right],
+        for ax,surf_mesh,stat_mesh,bg_map,hemi,title in zip(
+                                                  [ax_left,ax_right],
                                                   [fsaverage.infl_left,fsaverage.infl_right],
+                                                  [fsaverage.pial_left,fsaverage.pial_right],
                                                   [fsaverage.sulc_left,fsaverage.sulc_right],
                                                   ['left','right'],
-                                                  [f'sub-0{ii+1},{model_names[jj]}',None],
+                                                  [f'sub-0{ii+1} | {model_names[jj]}',None],
                                                   ):
-            brain_map_in_surf = surface.vol_to_surf(brain_map_for_plot,surf_mesh,radius = radius,)
+            brain_map_in_surf = surface.vol_to_surf(brain_map_for_plot,stat_mesh,radius = radius,)
             plotting.plot_surf_stat_map(surf_mesh,
                                         brain_map_in_surf,
                                         bg_map = bg_map,
@@ -152,41 +155,34 @@ for ii,row_axes in enumerate(axes):
                                         axes = ax,
                                         figure = fig,
                                         title = title,
-                                        cmap = plt.cm.coolwarm,
+                                        cmap = plt.cm.seismic,
                                         colorbar = False,
                                         vmax = vmax,
-                                        symmetric_cbar = 'auto',)
-#        plotting.plot_stat_map(brain_map_for_plot,
-#                               standard_brain,
-#                               cut_coords = (43,28,4),
-#                               draw_cross = False,
-#                               threshold = 1e-2,
-#                               axes = column_ax,
-#                               figure = fig,
-#                               title = f'sub-0{ii+1},{model_names[jj]}',
-#                               cmap = plt.cm.coolwarm,
-#                               colorbar = False,
-#                               vmax = vmax,
-#                               )
+                                        symmetric_cbar = False,)
 cbar_ax = fig.add_axes([0.92,bottom,0.01,top - bottom])
 cbar = fig.colorbar(im,cax = cbar_ax)
-cbar.set_ticks(np.array([-vmax,0,vmax]))
-cbar.set_ticklabels(np.array([-vmax,0,vmax],dtype = str))
+cbar.set_ticks(np.array([0,vmax]))
+cbar.set_ticklabels(np.array([0,vmax],dtype = str))
 
 if average:
-#    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_average_standard_space.jpg'),
-#                dpi = 300,
-#                bbox_inches = 'tight')
+    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_average_standard_space.jpg'),
+                 dpi = 300,
+                 bbox_inches = 'tight')
     fig.savefig(os.path.join(figure_dir,f'{conscious_state}_average_standard_space(light).jpg'),
-#                dpi = 300,
-                bbox_inches = 'tight')
+                 dpi = 300,
+                 bbox_inches = 'tight')
 else:
-#    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_bootstrap_standard_space.jpg'),
-#                dpi = 300,
-#                bbox_inches = 'tight')
-    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_bootstrap_standard_space(light).jpg'),
-#                dpi = 300,
+    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_bootstrap_standard_space.jpg'),
+                dpi = 300,
                 bbox_inches = 'tight')
+    fig.savefig(os.path.join(figure_dir,f'{conscious_state}_bootstrap_standard_space(light).jpg'),
+                dpi = 300,
+                 bbox_inches = 'tight')
+#fig.savefig(os.path.join(collect_dir,f'supfigure{condict[conscious_state]}.eps'),
+#            dpi = 300,
+#            bbox_inches = 'tight')
+fig.savefig(os.path.join(collect_dir,f'supfigure{condict[conscious_state]}.png'),
+            bbox_inches = 'tight')
 plt.close('all')
 
 """

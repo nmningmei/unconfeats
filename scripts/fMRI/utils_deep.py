@@ -297,17 +297,17 @@ class IMAGE_VAE(nn.Module):
         self.sampling_method        = sampling_method
         
         self.encoder                = image_encoder(
-            batch_size             = self.batch_size,
-            device                 = self.device,
-            model_name             = self.model_name,
-            pretrained             = self.pretrained,
-            latent_size            = self.latent_size,)
+            batch_size              = self.batch_size,
+            device                  = self.device,
+            model_name              = self.model_name,
+            pretrained              = self.pretrained,
+            latent_size             = self.latent_size,)
         self.decoder                = image_decoder(
-            batch_size             = self.batch_size,
-            device                 = self.device,
-            out_channels           = self.out_channels,
-            kernel_size            = self.kernel_size,
-            latent_size            = self.latent_size,)
+            batch_size              = self.batch_size,
+            device                  = self.device,
+            out_channels            = self.out_channels,
+            kernel_size             = self.kernel_size,
+            latent_size             = self.latent_size,)
         self.log_scale              = nn.Parameter(torch.Tensor([0.0]))
         self.latent_activation      = nn.Tanh
     
@@ -883,6 +883,223 @@ class Conv2D_model(nn.Module):
         out3 = self.activation(self.view3(x3))
         return out1,out2,out3
 
+class Simple2DEncoder(nn.Module):
+    def __init__(self,
+                 pretrained_model_name,
+                 batch_size         = 10,
+                 device             = 'cpu',
+                 in_shape           = (1,66,88,88),
+                 hidden_units       = 128,
+                 pretrained         = True,
+                 ):
+        super(Simple2DEncoder, self).__init__()
+        
+        self.batch_size = batch_size
+        self.device     = device
+        self.pretrained = pretrained
+        torch.manual_seed(12345)
+        if define_type(pretrained_model_name) == 'simple':
+            pretrained_model    = candidate_pretrained_CNNs(pretrained_model_name,pretrained = pretrained)
+            layer = pretrained_model.features[0][0]
+            copy_weights = 0
+            # create new first layer
+            new_layer = nn.Conv2d(in_channels = in_shape[1], 
+                                  out_channels = layer.out_channels,
+                                  kernel_size = layer.kernel_size,
+                                  stride = layer.stride,
+                                  padding = layer.padding,
+                                  bias = layer.bias,
+                                  )
+            new_layer.weight[:,:layer.in_channels,:,:] = layer.weight.clone()
+            for ii in range(in_shape[1] - layer.in_channels):
+                channel = layer.in_channels + 1
+                new_layer.weight[:,channel:channel+1,:,:] = layer.weight[:,copy_weights:copy_weights + 1,:,:].clone()
+            new_layer.weight = nn.Parameter(new_layer.weight)
+            pretrained_model.features[0][0] = new_layer
+        # freeze the weights of the CNN
+        if self.pretrained:
+            for layer in pretrained_model.parameters():
+                layer.requires_grad = False
+        adaptive_pooling        = nn.AdaptiveAvgPool2d((1,1))
+        in_features             = nn.AdaptiveAvgPool2d((1,1))(pretrained_model.features(torch.rand(*in_shape))).shape[1]
+        if self.pretrained:
+            self.hidden_layer_1 = nn.Linear(in_features,hidden_units).to(device)
+            self.hidden_layer_2 = nn.Linear(in_features,hidden_units).to(device)
+        
+        print(f'feature dim = {in_features}')
+        self.features           = nn.Sequential(pretrained_model.features,
+                                                adaptive_pooling,).to(device)
+    def forward(self,x):
+        # transpose
+        x1 = x.clone()
+        x2 = x.permute([0,1,3,2])
+        # extract representations
+        if self.pretrained:
+            with torch.no_grad():
+                rep1 = torch.squeeze(torch.squeeze(self.features(x1),3),2)
+                rep2 = torch.squeeze(torch.squeeze(self.features(x2),3),2)
+        else:
+            rep1 = torch.squeeze(torch.squeeze(self.features(x1),3),2)
+            rep2 = torch.squeeze(torch.squeeze(self.features(x2),3),2)
+        if self.pretrained:
+            # extra layer
+            rep1 = torch.sigmoid(self.hidden_layer_1(rep1))
+            rep2 = torch.sigmoid(self.hidden_layer_2(rep2))
+        # normalize for cosine distance
+        rep1 = rep1 - rep1.mean(1).reshape(-1,1)
+        rep2 = rep2 - rep2.mean(1).reshape(-1,1)
+        
+        return rep1,rep2
+##############################################################################
+
+def create_data_loader_for_BOLD(working_data,
+                                train_size = .9,
+                                batch_size = 2,
+                                ):
+    BOLD_data = torch.from_numpy(working_data.T)
+    idx_train = np.random.choice(BOLD_data.shape[0],
+                                 size = int(BOLD_data.shape[0] * train_size),
+                                 replace = False,
+                                 )
+    temp = np.ones(BOLD_data.shape[0],) * False
+    temp[idx_train] = True
+    idx_train = temp.copy().astype(bool)
+    idx_valid = np.logical_not(idx_train)
+    
+    BOLD_train = TensorDataset(BOLD_data[idx_train])
+    BOLD_valid = TensorDataset(BOLD_data[idx_valid])
+    
+    torch.manual_seed(12345)
+    dataloader_train = DataLoader(BOLD_train,
+                                  batch_size = batch_size,
+                                  shuffle = True,
+                                  num_workers = 1,
+                                  drop_last = True,)
+    dataloader_valid = DataLoader(BOLD_valid,
+                                  batch_size = batch_size,
+                                  shuffle = True,
+                                  num_workers = 1,
+                                  drop_last = True,)
+    return dataloader_train,dataloader_valid
+    
+    
+def cosine2by2(representation1, representation2,device = 'cpu'):
+    loss_func = nn.CosineEmbeddingLoss()
+    
+    x1 = torch.cat([representation1,representation1])
+    x2 = torch.cat([representation2,torch.flipud(representation2)])
+    
+    # idx_same = np.random.choice(x1.shape[0],size = int(x1.shape[0]/2),replace = False)
+    # temp = np.ones(x1.shape[0]) * False
+    # temp[idx_same] = True
+    
+    # x1_same,x2_same = x1[temp],x2[temp]
+    # x1_diff,x2_diff = x1[np.logical_not(temp)],x2[np.logical_not(temp)]
+    # # shuffle x2_diff
+    # x2_diff = x2_diff[np.random.choice(x2_diff.shape[0],x2_diff.shape[0],replace = False)]
+    
+    # x1 = torch.cat([x1_same,x1_diff])
+    # x2 = torch.cat([x2_same,x2_diff])
+    # y = torch.ones(x1.shape[0])
+    # y[int(y.shape[0] / 2):]  = -1
+    y = torch.tensor([1,1,-1,-1])
+    idx = np.random.choice(len(y),len(y),replace = False)
+    return loss_func(x1[idx].to(device),x2[idx].to(device),y[idx].to(device))
+
+def train_loop(
+        net,
+        dataloader,
+        optimizer,
+        # loss_func,
+        device,
+        idx_epoch = 0,
+        print_train = True,
+        ):
+    train_loss = 0.
+    # set the model to "train"
+    net.to(device).train(True)
+    # verbose level
+    iterator   = tqdm(enumerate(dataloader)) if print_train else enumerate(dataloader)
+    
+    for ii,input_volume in iterator:
+        input_volume = input_volume[0]
+        # first thing to do is to zero grad the optimizer for the current batch
+        optimizer.zero_grad()
+        # forward pass
+        input_volume = Variable(input_volume).to(device)
+        rep1,rep2 = net(input_volume)
+        # calculate the loss
+        loss_batch = cosine2by2(rep1,rep2,device = device,)
+        # backpropagation
+        loss_batch.backward()
+        # modify the weights
+        optimizer.step()
+        # record the training loss of a mini-batch
+        train_loss  += loss_batch.data
+        if print_train:
+            iterator.set_description(f'epoch {idx_epoch+1}-{ii + 1:3.0f}/{100*(ii+1)/len(dataloader):2.3f}%,loss = {train_loss/(ii+1):.6f}')
+    
+    return train_loss
+
+def valid_loop(
+        net,
+        dataloader,
+        # loss_func,
+        device,
+        idx_epoch = 0,
+        print_train = True,):
+    valid_loss = 0.
+    # set the model to "train"
+    net.to(device).eval()
+    # verbose level
+    iterator   = tqdm(enumerate(dataloader)) if print_train else enumerate(dataloader)
+    
+    for ii,input_volume in iterator:
+        input_volume = input_volume[0]
+        with torch.no_grad():
+            # forward pass
+            input_volume = Variable(input_volume).to(device)
+            rep1,rep2 = net(input_volume)
+            # calculate the loss
+            loss_batch = cosine2by2(rep1,rep2,device = device,)
+            valid_loss  += loss_batch.data
+        if print_train:
+            iterator.set_description(f'epoch {idx_epoch+1}-{ii + 1:3.0f}/{100*(ii+1)/len(dataloader):2.3f}%,loss = {valid_loss/(ii+1):.6f}')
+    
+    return valid_loss
+
+def train_and_valid_loop(encoder,
+                         dataloader_train,
+                         dataloader_valid,
+                         device,
+                         optimizer,
+                         f_name,
+                         n_epochs = int(1e3),
+                         tol = 1e-4,
+                         patience = 5,
+                         ):
+    best_valid_loss     = np.inf
+    losses = []
+    counts = 0
+    for idx_epoch in range(n_epochs):
+        print('\ntraining...')
+        _ = train_loop(encoder, dataloader_train, optimizer, device,idx_epoch = idx_epoch,)
+        print('\nvalidating...')
+        valid_loss = valid_loop(encoder,dataloader_valid,device,idx_epoch = idx_epoch,)
+        
+        temp = valid_loss.cpu().clone().detach().type(torch.float64)
+        if np.logical_and(temp < best_valid_loss,np.abs(best_valid_loss - temp) >= tol):
+            best_valid_loss = valid_loss.cpu().clone().detach().type(torch.float64)
+            torch.save(encoder.state_dict(),f_name)# why do i need state_dict()?
+            counts = 0
+        else:
+            encoder.load_state_dict(torch.load(f_name,map_location = device))
+            counts += 1
+        losses.append(best_valid_loss)
+    
+        if counts >= patience:#(len(losses) > patience) and (len(set(losses[-patience:])) == 1):
+            break
+    return encoder
 
 '''
 class feature_extractor(nn.Module):

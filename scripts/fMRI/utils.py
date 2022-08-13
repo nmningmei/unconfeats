@@ -16,7 +16,7 @@ except Exception as e:
 from glob import glob
 import re
 import os
-
+from typing import List, Callable, Union, Any, TypeVar, Tuple, Optional
 import numpy as np
 import pandas as pd
 import pickle
@@ -56,7 +56,10 @@ from sklearn.model_selection                       import (StratifiedShuffleSpli
                                                            cross_val_score)
 from sklearn.ensemble                              import RandomForestClassifier,BaggingClassifier,VotingClassifier
 from sklearn.neural_network                        import MLPClassifier
-from xgboost                                       import XGBClassifier
+try:
+    from xgboost                                       import XGBClassifier
+except:
+    print('...xgboost')
 from itertools                                     import product,combinations
 # from sklearn.base                                  import clone
 from sklearn.neighbors                             import KNeighborsClassifier
@@ -1096,10 +1099,21 @@ def add_track(df_sub):
     df_sub['n_volume'] = n_rows
     df_sub['time_indices'] = temp
     return df_sub
-def groupby_average(fmri,df,groupby = ['trials'],axis = 0):
-    BOLD_average = np.array([np.mean(fmri[df_sub.index],axis) for _,df_sub in df.groupby(groupby)])
-    df_average = pd.concat([add_track(df_sub) for ii,df_sub in df.groupby(groupby)])
-    return BOLD_average,df_average
+
+def groupby_average(list_of_arrays:List,df:pd.DataFrame,groupby:List = ['trials'],axis:int = 0):
+    """
+    To compute the average groupby the dataframe
+    list_of_arrays: list of ndarrays
+    df: pandas.DataFrame,
+        dataframe object
+    groupby: str or list of strings
+    """
+    place_holder = {ii:[] for ii in range(len(list_of_arrays))}
+    df = df.reset_index(drop = True)
+    for ii,array in enumerate(list_of_arrays):
+        place_holder[ii] = np.array([np.mean(array[df_sub.index],axis) for _,df_sub in df.groupby(groupby)])
+    df_average = pd.concat([df_sub.iloc[0,:].to_frame().T for ii,df_sub in df.groupby(groupby)])
+    return place_holder,df_average
 
 def get_brightness_threshold(thresh):
     return [0.75 * val for val in thresh]
@@ -2443,6 +2457,101 @@ def create_highpass_filter_workflow(workflow_name   = 'highpassfiler',
     
     return highpass_workflow
 
+def convert_individual_space_to_standard_space(brain_map_individual_space,
+                                               standard_brain,
+                                               in_transformation_matrix_file,
+                                               out_transformation_matrix_file,
+                                               brain_map_standard_space,
+                                               run_algorithm = False,
+                                               ):
+    from nipype.interfaces            import fsl
+    """
+    FSL FLIRT alogirthm called by nipype
+    
+    brain_map_individual_space: string or os.path.abspath
+        the path of the brain map in individual space
+    standard_brain: string or os.path.abspath
+        the path of the MNI standard brain 2mm brain map
+    in_transformation_matrix_file: string or os.path.abspath
+        the path of the transformation matrix that convert individual space to standard space
+    out_transformation_matrix_file: string or os.path.abspath
+        an output transformation matrix
+    brain_map_standard_space: string or os.path.abspath
+        output file path
+    run_algorithm: bool, default = False
+    """
+    
+    
+    flt = fsl.FLIRT()
+    flt.inputs.in_file          = os.path.abspath(brain_map_individual_space)
+    flt.inputs.reference        = os.path.abspath(standard_brain)
+    flt.inputs.in_matrix_file   = os.path.abspath(in_transformation_matrix_file)
+    flt.inputs.out_matrix_file  = os.path.abspath(out_transformation_matrix_file)
+    flt.inputs.out_file         = os.path.abspath(brain_map_standard_space)
+    flt.inputs.output_type      = 'NIFTI_GZ'
+    flt.inputs.apply_xfm        = True
+    if run_algorithm:
+        flt.run()
+    else:
+        print(flt.cmdline)
+    return flt
+
+def nipype_fsl_randomise(input_file,
+                         mask_file,
+                         base_name,
+                         tfce                   = True,
+                         var_smooth             = 6,
+                         demean                 = False,
+                         one_sample_group_mean  = True,
+                         n_permutation          = int(1e4),
+                         quiet                  = False,
+                         run_algorithm          = False,
+                         ):
+    from nipype.interfaces            import fsl
+    """
+    Run FSL-randomise for a one-tailed one-sample t test, correct
+        by TFCE
+    
+    input_file: string or os.path.abspath
+        4DNifti1Image
+    mask_file: string or os.path.abspath
+        3DNifti1Image
+    base_name: string or os.path.abspath
+        base name
+    tfce: bool, default = True
+        to correct the p values with TFCE
+    var_smooth: int, default = 6
+        size for variance smoothing, unit = mm
+    demean: bool, default = False
+        temporally remove the mean before computation
+    one_sample_group_mean: bool, default = True
+        one-sample t test
+    n_permutation: int, default = 10000
+        number of permutations, set to 0 for exhausive
+    quiet: bool, default = False
+        set to True to surpress the outputs
+    run_algorithm: bool, default = False
+        run the algorithm or print the command line code
+    """
+    rand                        = fsl.Randomise()
+    if quiet:
+        rand.inputs.args        = '--quiet'
+    rand.inputs.in_file         = os.path.abspath(input_file)
+    rand.inputs.mask            = os.path.abspath(mask_file)
+    rand.inputs.tfce            = tfce
+    rand.inputs.var_smooth      = var_smooth
+    rand.inputs.base_name       = os.path.abspath(base_name)
+    rand.inputs.demean          = demean
+    rand.inputs.one_sample_group_mean = one_sample_group_mean
+    rand.inputs.num_perm        = n_permutation
+    rand.inputs.seed            = 12345
+    
+    if run_algorithm:
+        rand.run()
+    else:
+        print(rand.cmdline)
+    return rand
+
 def load_csv(f,print_ = False,sub = None):
     temp = re.findall(r'\d+',f)
     n_session = int(temp[-2])
@@ -2596,6 +2705,7 @@ def Find_Optimal_Cutoff(target, predicted):
     roc_t                       = roc.iloc[(roc.tf-0).abs().argsort()[:1]]
 
     return list(roc_t['threshold']) 
+
 def customized_partition(df_data,groupby_column = ['id','labels'],n_splits = 100,):
     """
     modified for unaveraged volumes
@@ -2639,6 +2749,7 @@ def check_train_test_splits(idxs_test):
                     temp.append(len(set(sample1).intersection(set(sample2))) == len(sample1))
     temp = np.array(temp)
     return any(temp)
+
 def check_train_balance(df,idx_train,keys = ['Living_Things','Nonliving_Things'],tol = 20):
     """
     check the balance of the training set.
@@ -2746,6 +2857,96 @@ def check_LOO_cv(idxs_test_target,df_data_target,df_data_source):
         # the testing set for the source does NOT matter since we don't care its performance
         idxs_test_source.append(idx_test_source)
     return cv_warning,idxs_train_source,idxs_test_source
+
+def partition_for_RSA(conscious_state_target,
+                      conscious_state_source,
+                      df_data_target,
+                      df_data_source,
+                      targets_target,
+                      targets_source,
+                      n_splits = -1,
+                      ):
+    from sklearn.model_selection import LeaveOneGroupOut,StratifiedKFold
+    """
+    This function generate partitioning folds for RSA
+    
+    Inputs
+    -----------------
+    conscious_state_target: string, 
+    conscious_state_source: string,
+    df_data_target: DataFrame object,
+    df_data_source: DataFrame object,
+    targets_target: ndarray, (n_samples, 2)
+    targets_source: ndarray, (n_samples, 2)
+    n_splits: int, default = -1
+    
+    Outputs
+    ----------------
+    idxs_train_source: list of ndarrays
+    idxs_test_source: list of ndarrays 
+    idxs_train_target: list of ndarrays
+    idxs_test_target: list of ndarrays
+    """
+    # partition the events
+    if n_splits == -1: # this is to do the out-of-sample generallization
+        print(f'partitioning target: {conscious_state_target}')
+        idxs_train_target,idxs_test_target  = LOO_partition(df_data_target)
+        n_splits                            = len(idxs_test_target)
+        print(f'{n_splits} folds of testing')
+        
+        # we partition the source training data according to the target dataset
+        print(f'partitioning source: {conscious_state_source}')
+        # for each fold of the train-test, we throw away the subcategories that exist in the target
+        cv_warning,idxs_train_source,idxs_test_source = check_LOO_cv(
+                idxs_test_target,df_data_target,df_data_source)
+    
+    elif n_splits == 1:
+        cv                                  = LeaveOneGroupOut()
+        groups_target                       = df_data_target['subcategory'].values
+        idxs_train_target,idxs_test_target  = [],[]
+        n_splits                            = cv.get_n_splits(df_data_target,
+                                                              targets_target[:,-1],
+                                                              groups_target)
+        print(f'leave one group out partitioning: {n_splits}')
+        for train,test in cv.split(df_data_target,targets_target[:,-1],groups_target):
+            idxs_train_target.append(train)
+            idxs_test_target.append(test)
+        cv_warning,idxs_train_source,idxs_test_source = check_LOO_cv(
+                idxs_test_target,df_data_target,df_data_source)
+    
+    elif n_splits == 24: # group by 96/n_splits unique items
+        groups_target   = df_data_target['labels'].values
+        groups_unique   = np.unique(groups_target)
+        groups_split    = np.array_split(groups_unique,n_splits)
+        idxs_train_target,idxs_test_target = [],[]
+        for group_in_group in groups_split:
+            idx_test    = np.logical_or.reduce([groups_target == item for item in group_in_group])
+            idx_train   = np.logical_not(idx_test)
+            idx_test,   = np.where(idx_test == True)
+            idx_train,  = np.where(idx_train == True)
+            idxs_test_target.append(idx_test)
+            idxs_train_target.append(idx_train)
+        cv_warning,idxs_train_source,idxs_test_source = check_LOO_cv(
+                idxs_test_target,df_data_target,df_data_source)
+    
+    else: # this is to do a stratified shuffle cross-validation
+        print(f'stratified partitioning: {n_splits}')
+        cv = StratifiedKFold(n_splits = n_splits,shuffle = True,random_state = 12345)
+        print(f'partitioning target: {conscious_state_target}')
+        idxs_train_target,idxs_test_target  = [],[]
+        for train,test in cv.split(df_data_target,targets_target[:,-1]):
+            idxs_train_target.append(train)
+            if conscious_state_source == conscious_state_target:
+                idxs_test_target.append(test)
+            else:
+                idxs_test_target.append(np.arange(df_data_target.shape[0]))
+        print(f'partitioning source: {conscious_state_source}')
+        # for each fold of the train-test, we throw away the subcategories that exist in the target
+        idxs_train_source,idxs_test_source  = [],[]
+        for train,test in cv.split(df_data_source,targets_source[:,-1]):
+            idxs_train_source.append(train)
+            idxs_test_source.append(test)
+    return idxs_train_source,idxs_test_source,idxs_train_target,idxs_test_target
 
 def resample_ttest(x,
                    baseline         = 0.5,

@@ -21,11 +21,9 @@ import numpy   as np
 from glob                      import glob
 #from tqdm                      import tqdm
 from copy                      import copy
-try:
-    from shutil                    import copyfile
-    copyfile('../../../utils.py','utils.py')
-except:
-    pass
+from shutil                    import copyfile
+copyfile('../../../utils.py','utils.py')
+
 from utils                     import (groupby_average,
                                        add_track
                                                 )
@@ -95,13 +93,14 @@ if __name__ == "__main__":
                     
                     targets         = np.array([label_map[item] for item in df_data['targets']])[:,-1]
                     images          = df_data['paths'].apply(lambda x: x.split('.')[0] + '.npy').values
-                    CNN_feature     = np.array([np.load(os.path.join(feature_dir,
+                    CNN_features    = np.array([np.load(os.path.join(feature_dir,
                                                                      model_name,
                                                                      item)) for item in images])
                     groups          = df_data['labels'].values
                     
-                    BOLD_average,df_average = groupby_average(BOLD_image,df_data,['labels'],)
-                    feature_average,_ = groupby_average(CNN_feature,df_data,['labels'],)
+                    temp,df_average = groupby_average([BOLD_image,CNN_features],df_data,['labels'],)
+                    BOLD_average = temp[0]
+                    feature_average = temp[1]
                     BOLD_average = masker.inverse_transform(BOLD_average)
                     def _searchligh_RSA(input_image,
                                         CNN_feature,
