@@ -74,810 +74,74 @@ except:
     print('what?')
 from matplotlib                                    import pyplot as plt
 from matplotlib.pyplot                             import cm
-from nilearn.plotting.img_plotting                 import (_load_anat,
-                                                           _utils,
-                                                           _plot_img_with_bg,
-                                                           _get_colorbar_and_data_ranges,
-                                                           _safe_get_data)
+#from nilearn.plotting.img_plotting                 import (_load_anat,
+#                                                           _utils,
+#                                                           _plot_img_with_bg,
+#                                                           _get_colorbar_and_data_ranges,
+#                                                           _safe_get_data)
 import matplotlib.patches as patches
 
 
 try:
-    #from mvpa2.datasets.base                           import Dataset
-    from mvpa2.mappers.fx                              import mean_group_sample
-    #from mvpa2.measures                                import rsa
-    #from mvpa2.measures.searchlight                    import sphere_searchlight
-    #from mvpa2.base.learner                            import ChainLearner
-    #from mvpa2.mappers.shape                           import TransposeMapper
-    #from mvpa2.generators.partition                    import NFoldPartitioner
-except:
-    pass#print('pymvpa is not installed')
-try:
 #    from tqdm import tqdm_notebook as tqdm
     from tqdm import tqdm
 except:
-    print('why is tqdm not installed?')
+    print('why is tqdm not installed?') 
 
-def find_outliers(X, threshold=3.0, max_iter=2):
-    """Find outliers based on iterated Z-scoring.
- 
-    This procedure compares the absolute z-score against the threshold.
-    After excluding local outliers, the comparison is repeated until no
-    local outlier is present any more.
+def get_sphere_data(mask,BOLD_data,radius:int = 4,):
+    """
     
-    ########ATTENTION ATTENTION ATTENTION#####
-    # This function if removed from MNE-python code base
 
     Parameters
     ----------
-    X : np.ndarray of float, shape (n_elemenets,)
-        The scores for which to find outliers.
-    threshold : float
-        The value above which a feature is classified as outlier.
-    max_iter : int
-        The maximum number of iterations.
- 
+    mask : Niimage like object
+        DESCRIPTION.
+    BOLD_data : Niimage like object
+        DESCRIPTION.
+    radius : int, default = 4
+        DESCRIPTION.
+
     Returns
     -------
-    bad_idx : np.ndarray of int, shape (n_features)
-        The outlier indices.
-    """
-    from scipy.stats import zscore
-    my_mask = np.zeros(len(X), dtype=np.bool)
-    for _ in range(max_iter):
-        X = np.ma.masked_array(X, my_mask)
-        this_z = np.abs(zscore(X))
-        local_bad = this_z > threshold
-        my_mask = np.max([my_mask, local_bad], 0)
-        if not np.any(local_bad):
-            break
- 
-    bad_idx = np.where(my_mask)[0]
-    return bad_idx
+    X : np.ndarray
+        The selected voxels in each sphere.
+    A : sparse.lil.lil_matrix
+        You use this sparse matrix to index the voxels in X. Iterate through A.rows
+        such as X[:,A.rows[idx]]
+    process_mask : np.ndarray of bool
+        DESCRIPTION.
+    process_mask_affine : np.ndarray
+        DESCRIPTION.
+    process_mask_coords : np.ndarray
+        DESCRIPTION.
 
-def preprocessing_conscious(raw,
-                            events,
-                            session,
-                            tmin = -0,
-                            tmax = 1,
-                            notch_filter = 50,
-                            event_id = {'living':1,'nonliving':2},
-                            baseline = (None,None),
-                            perform_ICA = False,
-                            lowpass = None,
-                            interpolate_bad_channels = True,):
     """
-    0. re-reference - explicitly
-    """
-    raw_ref ,_  = mne.set_eeg_reference(raw,
-                                        ref_channels     = 'average',
-                                        projection       = True,)
-    raw_ref.apply_proj() # it might tell you it already has been re-referenced, but do it anyway
+    from nilearn import masking
+    try:
+        from nilearn.maskers.nifti_spheres_masker import _apply_mask_and_get_affinity 
+    except:
+        from nilearn.input_data.nifti_spheres_masker import _apply_mask_and_get_affinity
+    from nilearn.image.resampling import coord_transform 
     
-    # everytime before filtering, explicitly pick the type of channels you want
-    # to perform the filters
-    picks = mne.pick_types(raw_ref.info,
-                           meg = False, # No MEG
-                           eeg = True,  # YES EEG
-                           eog = perform_ICA,  # depends on ICA
-                           )
-    # regardless the bandpass filtering later, we should always filter
-    # for wire artifacts and their oscillations
-    raw_ref.notch_filter(np.arange(notch_filter,241,notch_filter),
-                         picks = picks)
-    if lowpass is not None:
-        raw_ref.filter(None,lowpass,)
-    epochs      = mne.Epochs(raw_ref,
-                             events,    # numpy array
-                             event_id,  # dictionary
-                             tmin        = tmin,
-                             tmax        = tmax,
-                             baseline    = baseline, # range of time for computing the mean references for each channel and subtract these values from all the time points per channel
-                             picks       = picks,
-                             detrend     = 1, # detrend
-                             preload     = True # must be true if we want to do further processing
-                             )
-    """
-    1. if necessary, perform ICA
-    """
-    if perform_ICA:
-        epochs_for_ICA = epochs.copy()
-        epochs_for_ICA.filter(1,lowpass)
-        picks       = mne.pick_types(epochs.info,
-                               eeg          = True, # YES EEG
-                               eog          = False # NO EOG
-                               )
-        if interpolate_bad_channels:
-            interpolation_list = faster_bad_channels(epochs,picks=picks)
-            for ch_name in interpolation_list:
-                epochs_for_ICA.info['bads'].append(ch_name)
-                epochs.info['bads'].append(ch_name)
-            epochs_for_ICA = epochs_for_ICA.interpolate_bads()
-            epochs = epochs.interpolate_bads()
-#        ar          = AutoReject(
-#                        picks               = picks,
-#                        random_state        = 12345,
-#                        )
-#        ar.fit(epochs)
-#        _,reject_log = ar.transform(epochs,return_log=True)
-        # calculate the noise covariance of the epochs
-        noise_cov   = mne.compute_covariance(epochs_for_ICA,#[~reject_log.bad_epochs],
-                                             tmin                   = baseline[0],
-                                             tmax                   = baseline[1],
-                                             method                 = 'empirical',
-                                             rank                   = None,)
-        # define an ica function
-        ica         = mne.preprocessing.ICA(n_components            = .99,
-                                            n_pca_components        = .99,
-                                            max_pca_components      = None,
-                                            method                  = 'infomax',
-                                            max_iter                = int(3e3),
-                                            noise_cov               = noise_cov,
-                                            random_state            = 12345,)
-        picks       = mne.pick_types(epochs_for_ICA.info,
-                                     eeg = True, # YES EEG
-                                     eog = False # NO EOG
-                                     ) 
-        ica.fit(epochs_for_ICA,#[~reject_log.bad_epochs],
-                picks   = picks,
-                start   = tmin,
-                stop    = tmax,
-                decim   = 3,
-                tstep   = 1. # Length of data chunks for artifact rejection in seconds. It only applies if inst is of type Raw.
-                )
-        # search for artificial ICAs automatically
-        # most of these hyperparameters were used in a unrelated published study
-        ica.detect_artifacts(epochs_for_ICA,#[~reject_log.bad_epochs],
-                             eog_ch         = ['FT9','FT10','TP9','TP10'],
-                             eog_criterion  = 0.4, # arbitary choice
-                             skew_criterion = 1,   # arbitary choice
-                             kurt_criterion = 1,   # arbitary choice
-                             var_criterion  = 1,   # arbitary choice
-                             )
-        picks       = mne.pick_types(epochs_for_ICA.info,
-                                     eeg = True, # YES EEG
-                                     eog = False # NO EOG
-                                     ) 
-        epochs_ica  = ica.apply(epochs,#,[~reject_log.bad_epochs],
-                                exclude    = ica.exclude,
-                                )
-        epochs = epochs_ica.copy()
-    else:
-        picks       = mne.pick_types(epochs.info,
-                               eeg          = True, # YES EEG
-                               eog          = False # NO EOG
-                               )
-        if interpolate_bad_channels:
-            interpolation_list = faster_bad_channels(epochs,picks=picks)
-            for ch_name in interpolation_list:
-                epochs.info['bads'].append(ch_name)
-            epochs = epochs.interpolate_bads()
-    # pick the EEG channels for later use
-    clean_epochs = epochs.pick_types(eeg = True, eog = False)
+    # Compute world coordinates of the seeds
+    process_mask, process_mask_affine = masking._load_mask_img(mask)
+    process_mask_coords = np.where(process_mask != 0)
+    process_mask_coords = coord_transform(process_mask_coords[0],
+                                          process_mask_coords[1],
+                                          process_mask_coords[2],
+                                          process_mask_affine,
+                                          )
+    process_mask_coords = np.asarray(process_mask_coords).T
     
-    return clean_epochs
-
-def preprocessing_unconscious(raw,
-                              events,
-                              session,
-                              tmin = -0,
-                              tmax = 1,
-                              notch_filter = 50,
-                              event_id = {'living':1,'nonliving':2},
-                              baseline = (None,None),
-                              perform_ICA = False,
-                              eog_chs = [],
-                              ecg_chs = [],):
-    # everytime before filtering, explicitly pick the type of channels you want
-    # to perform the filters
-    picks = mne.pick_types(raw.info,
-                           meg = True,  # No MEG
-                           eeg = False, # NO EEG
-                           eog = True,  # YES EOG
-                           ecg = True,  # YES ECG
-                           )
-    # regardless the bandpass filtering later, we should always filter
-    # for wire artifacts and their oscillations
-    if type(notch_filter) is list:
-        for item in notch_filter:
-            raw.notch_filter(np.arange(item,301,item),
-                                 picks = picks)
-    else:
-        raw.notch_filter(np.arange(notch_filter,301,notch_filter),
-                             picks = picks)
-    # filter EOG and ECG channels
-    picks = mne.pick_types(raw.info,
-                           meg = False,
-                           eeg = False,
-                           eog = True,
-                           ecg = True,)
-    raw.filter(1,12,picks = picks,)
-    # epoch the data
-    picks = mne.pick_types(raw.info,
-                           meg = True,
-                           eog = True,
-                           ecg = True,
-                           )
-    epochs      = mne.Epochs(raw,
-                             events,    # numpy array
-                             event_id,  # dictionary
-                             tmin        = tmin,
-                             tmax        = tmax,
-                             baseline    = baseline, # range of time for computing the mean references for each channel and subtract these values from all the time points per channel
-                             picks       = picks,
-                             detrend     = 1, # detrend
-                             preload     = True # must be true if we want to do further processing
-                             )
-    """
-    1. if necessary, perform ICA
-    """
-    if perform_ICA:
-        picks       = mne.pick_types(epochs.info,
-                               meg          = True,  # YES MEG
-                               eeg          = False, # NO EEG
-                               eog          = False, # NO EOG
-                               ecg          = False, # NO ECG
-                               )
-#        ar          = AutoReject(
-#                        picks               = picks,
-#                        random_state        = 12345,
-#                        )
-#        ar.fit(epochs)
-#        _,reject_log = ar.transform(epochs,return_log=True)
-        # calculate the noise covariance of the epochs
-        noise_cov   = mne.compute_covariance(epochs,#[~reject_log.bad_epochs],
-                                             tmin                   = tmin,
-                                             tmax                   = 0,
-                                             method                 = 'empirical',
-                                             rank                   = None,)
-        # define an ica function
-        ica         = mne.preprocessing.ICA(n_components            = .99,
-                                            n_pca_components        = .99,
-                                            max_pca_components      = None,
-                                            method                  = 'extended-infomax',
-                                            max_iter                = int(3e3),
-                                            noise_cov               = noise_cov,
-                                            random_state            = 12345,)
-        picks       = mne.pick_types(epochs.info,
-                                     eeg = True, # YES EEG
-                                     eog = False # NO EOG
-                                     ) 
-        ica.fit(epochs,#[~reject_log.bad_epochs],
-                picks   = picks,
-                start   = tmin,
-                stop    = tmax,
-                decim   = 3,
-                tstep   = 1. # Length of data chunks for artifact rejection in seconds. It only applies if inst is of type Raw.
-                )
-        # search for artificial ICAs automatically
-        # most of these hyperparameters were used in a unrelated published study
-        ica.detect_artifacts(epochs,#[~reject_log.bad_epochs],
-                             eog_ch         = eog_chs,
-                             ecg_ch         = ecg_chs[0],
-                             eog_criterion  = 0.4, # arbitary choice
-                             ecg_criterion  = 0.1, # arbitary choice
-                             skew_criterion = 1,   # arbitary choice
-                             kurt_criterion = 1,   # arbitary choice
-                             var_criterion  = 1,   # arbitary choice
-                             )
-        epochs_ica  = ica.apply(epochs,#,[~reject_log.bad_epochs],
-                                exclude    = ica.exclude,
-                                )
-        epochs = epochs_ica.copy()
-    # pick the EEG channels for later use
-    clean_epochs = epochs.pick_types(meg = True, eeg = True, eog = False)
-    
-    return clean_epochs
-def _preprocessing_conscious(
-                  raw,events,session,
-                  n_interpolates = np.arange(1,32,4),
-                  consensus_pers = np.linspace(0,1.0,11),
-                  event_id = {'living':1,'nonliving':2},
-                  tmin = -0.15,
-                  tmax = 0.15 * 6,
-                  high_pass = 0.001,
-                  low_pass = 30,
-                  notch_filter = 50,
-                  fix = False,
-                  ICA = False,
-                  logging = None,
-                  filtering = False,):
-    """
-    Preprocessing pipeline for conscious trials
-    
-    Inputs
-    -------------------
-    raw: MNE Raw object, contineous EEG raw data
-    events: Numpy array with 3 columns, where the first column indicates time and the last column indicates event code
-    n_interpolates: list of values 1 <= N <= max number of channels
-    consensus_pers: ?? autoreject hyperparameter search grid
-    event_id: MNE argument, to control for epochs
-    tmin: first time stamp of the epoch
-    tmax: last time stamp of the epoch
-    high_pass: low cutoff of the bandpass filter
-    low_pass: high cutoff of the bandpass filter
-    notch_filter: frequency of the notch filter, 60 in US and 50 in Europe
-    fix : when "True", apply autoReject algorithm to remove artifacts that was not identifed in the ICA procedure
-    Output
-    ICA : when "True", apply ICA artifact correction in ICA space
-    logging: when not "None", output some log files for us to track the process
-    -------------------
-    Epochs: MNE Epochs object, segmented and cleaned EEG data (n_trials x n_channels x n_times)
-    """
-    
-    """
-    0. re-reference - explicitly
-    """
-    raw_ref ,_  = mne.set_eeg_reference(raw,
-                                       ref_channels     = 'average',
-                                       projection       = True,)
-    raw_ref.apply_proj() # it might tell you it already has been re-referenced, but do it anyway
-    """
-    1. highpass filter 
-        by a 4th order zero-phase Butterworth filter
-    """
-    # everytime before filtering, explicitly pick the type of channels you want
-    # to perform the filters
-    picks = mne.pick_types(raw_ref.info,
-                           meg = False, # No MEG
-                           eeg = True,  # YES EEG
-                           eog = True,  # YES EOG
-                           )
-    # regardless the bandpass filtering later, we should always filter
-    # for wire artifacts and their oscillations
-    raw_ref.notch_filter(np.arange(notch_filter,241,notch_filter),
-                         picks = picks)
-    # high pass filtering
-    picks = mne.pick_types(raw_ref.info,
-                           meg = False, # No MEG
-                           eeg = True,  # YES EEG
-                           eog = False, # No EOG
-                           )
-    if filtering:
-        raw_ref.filter(high_pass,
-                       None,
-                       picks            = picks,
-                       filter_length    = 'auto',    # the filter length is chosen based on the size of the transition regions (6.6 times the reciprocal of the shortest transition band for fir_window=’hamming’ and fir_design=”firwin2”, and half that for “firwin”)
-                       l_trans_bandwidth= high_pass,
-                       method           = 'fir',     # overlap-add FIR filtering
-                       phase            = 'zero',    # the delay of this filter is compensated for
-                       fir_window       = 'hamming', # The window to use in FIR design
-                       fir_design       = 'firwin2',  # a time-domain design technique that generally gives improved attenuation using fewer samples than “firwin2”
-                       )
-        
-    """
-    2. epoch the data
-    """
-    picks       = mne.pick_types(raw_ref.info,
-                           eeg      = True, # YES EEG
-                           eog      = True, # YES EOG
-                           )
-    epochs      = mne.Epochs(raw_ref,
-                             events,    # numpy array
-                             event_id,  # dictionary
-                        tmin        = tmin,
-                        tmax        = tmax,
-                        baseline    = (tmin,- (1 / 60 * 20)), # range of time for computing the mean references for each channel and subtract these values from all the time points per channel
-                        picks       = picks,
-                        detrend     = 1, # linear detrend
-                        preload     = True # must be true if we want to do further processing
-                        )
-    
-    """
-    4. ica on epoch data
-    """
-    if ICA:
-        """
-        3. apply autoreject
-        """
-        picks       = mne.pick_types(epochs.info,
-                               eeg          = True, # YES EEG
-                               eog          = False # NO EOG
-                               )
-        ar          = AutoReject(
-    #                    n_interpolate       = n_interpolates,
-    #                    consensus           = consensus_pers,
-    #                    thresh_method       = 'bayesian_optimization',
-                        picks               = picks,
-                        random_state        = 12345,
-    #                    n_jobs              = 1,
-    #                    verbose             = 'progressbar',
-                        )
-        ar.fit(epochs)
-        _,reject_log = ar.transform(epochs,return_log=True)
-        
-        if logging is not None:
-            fig = plot_EEG_autoreject_log(ar)
-            fig.savefig(logging,bbox_inches = 'tight')
-            for key in epochs.event_id.keys():
-                evoked = epochs[key].average()
-                fig_ = evoked.plot_joint(title = key) 
-                fig_.savefig(logging.replace('.png',f'_{key}_pre.png'),
-                             bbox_inches = 'tight')
-                plt.close('all')
-        # calculate the noise covariance of the epochs
-        noise_cov   = mne.compute_covariance(epochs[~reject_log.bad_epochs],
-                                             tmin                   = tmin,
-                                             tmax                   = tmax,
-                                             method                 = 'empirical',
-                                             rank                   = None,)
-        # define an ica function
-        ica         = mne.preprocessing.ICA(n_components            = .99,
-                                            n_pca_components        = .99,
-                                            max_pca_components      = None,
-                                            method                  = 'extended-infomax',
-                                            max_iter                = int(3e3),
-                                            noise_cov               = noise_cov,
-                                            random_state            = 12345,)
-    #    # search for a global rejection threshold globally
-    #    reject      = get_rejection_threshold(epochs[~reject_log.bad_epochs],
-    #                                          decim = 1,
-    #                                          random_state = 12345)
-        picks       = mne.pick_types(epochs.info,
-                                     eeg = True, # YES EEG
-                                     eog = False # NO EOG
-                                     ) 
-        ica.fit(epochs[~reject_log.bad_epochs],
-                picks   = picks,
-                start   = tmin,
-                stop    = tmax,
-    #            reject  = reject, # if some data in a window has values that exceed the rejection threshold, this window will be ignored when computing the ICA
-                decim   = 3,
-                tstep   = 1. # Length of data chunks for artifact rejection in seconds. It only applies if inst is of type Raw.
-                )
-        # search for artificial ICAs automatically
-        # most of these hyperparameters were used in a unrelated published study
-        ica.detect_artifacts(epochs[~reject_log.bad_epochs],
-                             eog_ch         = ['FT9','FT10','TP9','TP10'],
-                             eog_criterion  = 0.4, # arbitary choice
-                             skew_criterion = 2,   # arbitary choice
-                             kurt_criterion = 2,   # arbitary choice
-                             var_criterion  = 2,   # arbitary choice
-                             )
-    #    # explicitly search for eog ICAs 
-    #    eog_idx,scores = ica.find_bads_eog(raw_ref,
-    #                            start       = tmin,
-    #                            stop        = tmax,
-    #                            l_freq      = 2,
-    #                            h_freq      = 10,
-    #                            )
-    #    ica.exclude += eog_idx
-        picks       = mne.pick_types(epochs.info,
-                                     eeg = True, # YES EEG
-                                     eog = False # NO EOG
-                                     ) 
-        epochs_ica  = ica.apply(epochs,#,[~reject_log.bad_epochs],
-                                exclude    = ica.exclude,
-                                )
-    else:
-        picks = mne.pick_types(epochs.info,
-                               eeg = True,
-                               eog = False,)
-#        epochs.filter(None,
-#                   low_pass,
-#                   picks            = picks,
-#                   filter_length    = 'auto',    # the filter length is chosen based on the size of the transition regions (6.6 times the reciprocal of the shortest transition band for fir_window=’hamming’ and fir_design=”firwin2”, and half that for “firwin”)
-#                   method           = 'fir',     # overlap-add FIR filtering
-#                   phase            = 'zero',    # the delay of this filter is compensated for
-#                   fir_window       = 'hamming', # The window to use in FIR design
-#                   fir_design       = 'firwin2',  # a time-domain design technique that generally gives improved attenuation using fewer samples than “firwin2”
-#                   )
-        if logging is not None:
-            for key in epochs.event_id.keys():
-                evoked = epochs[key].average()
-                fig_ = evoked.plot_joint(title = key) 
-                fig_.savefig(logging.replace('.png',f'_{key}_post.png'),
-                             bbox_inches = 'tight')
-                plt.close('all')
-        return epochs
-    if fix:
-        """
-        
-        """
-        ar          = AutoReject(
-#                        n_interpolate       = n_interpolates,
-#                        consensus           = consensus_pers,
-#                        thresh_method       = 'bayesian_optimization',
-                        picks               = picks,
-                        random_state        = 12345,
-#                        n_jobs              = 1,
-#                        verbose             = 'progressbar',
-                        )
-        epochs_clean = ar.fit_transform(epochs_ica,
+    X, A = _apply_mask_and_get_affinity(seeds = process_mask_coords,
+                                        niimg = BOLD_data,
+                                        radius = radius,
+                                        allow_overlap = True,
+                                        mask_img = mask,
                                         )
-        
-        return epochs_clean.pick_types(eeg=True,eog=False)
-    else:
-        clean_epochs = epochs_ica.pick_types(eeg = True,
-                                             eog = False)
-        picks = mne.pick_types(clean_epochs.info,
-                               eeg = True,
-                               eog = False,)
-#        clean_epochs.filter(None,
-#                   low_pass,
-#                   picks            = picks,
-#                   filter_length    = 'auto',    # the filter length is chosen based on the size of the transition regions (6.6 times the reciprocal of the shortest transition band for fir_window=’hamming’ and fir_design=”firwin2”, and half that for “firwin”)
-#                   method           = 'fir',     # overlap-add FIR filtering
-#                   phase            = 'zero',    # the delay of this filter is compensated for
-#                   fir_window       = 'hamming', # The window to use in FIR design
-#                   fir_design       = 'firwin2',  # a time-domain design technique that generally gives improved attenuation using fewer samples than “firwin2”
-#                   )
-        if logging is not None:
-            for key in clean_epochs.event_id.keys():
-                evoked = epochs[key].average()
-                fig_ = evoked.plot_joint(title = key) 
-                fig_.savefig(logging.replace('.png',f'_{key}_post.png'),
-                             bbox_inches = 'tight')
-                plt.close('all')
-        return clean_epochs
-def plot_temporal_decoding(times,
-                           scores,
-                           frames,
-                           ii,
-                           conscious_state,
-                           plscores,
-                           n_splits,
-                           ylim = (0.2,0.8)):
-    scores_mean = scores.mean(0)
-    scores_se   = scores.std(0) / np.sqrt(n_splits)
-    fig,ax = plt.subplots(figsize = (16,8))
-    ax.plot(times,scores_mean,
-            color = 'k',
-            alpha = .9,
-            label = f'Average across {n_splits} folds',
-            )
-    ax.fill_between(times,
-                    scores_mean + scores_se,
-                    scores_mean - scores_se,
-                    color = 'red',
-                    alpha = 0.4,
-                    label = 'Standard Error',)
-    ax.axhline(0.5,
-               linestyle    = '--',
-               color        = 'k',
-               alpha        = 0.7,
-               label        = 'Chance level')
-    ax.axvline(0,
-               linestyle    = '--',
-               color        = 'blue',
-               alpha        = 0.7,
-               label        = 'Probe onset',)
-    if ii is not None:
-        ax.axvspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color        = 'blue',
-                   alpha        = 0.3,
-                   label        = 'probe offset ave +/- std',)
-    ax.set(xlim     = (times.min(),
-                       times.max()),
-           ylim     = ylim,#(0.4,0.6),
-           title    = f'Temporal decoding of {conscious_state} = {plscores.mean():.3f}+/-{plscores.std():.3f}',
-           )
-    ax.legend()
-    return fig,ax
-def plot_temporal_generalization(scores_gen_,
-                                 times,
-                                 ii,
-                                 conscious_state,
-                                 frames,
-                                 vmin = 0.4,
-                                 vmax = 0.6):
-    fig, ax = plt.subplots(figsize = (10,10))
-    if len(scores_gen_.shape) > 2:
-        scores_gen_ = scores_gen_.mean(0)
-    im      = ax.imshow(
-                        scores_gen_, 
-                        interpolation       = 'hamming', 
-                        origin              = 'lower', 
-                        cmap                = 'RdBu_r',
-                        extent              = times[[0, -1, 0, -1]], 
-                        vmin                = vmin, 
-                        vmax                = vmax,
-                        )
-    ax.set_xlabel('Testing Time (s)')
-    ax.set_ylabel('Training Time (s)')
-    ax.set_title(f'Temporal generalization of {conscious_state}')
-    ax.axhline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               label                        = 'Probe onset',)
-    ax.axvline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               )
-    if ii is not None:
-        ax.axhspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   label                        = 'probe offset ave +/- std',)
-        ax.axvspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   )
-    plt.colorbar(im, ax = ax)
-    ax.legend()
-    return fig,ax
+    return X,A,process_mask,process_mask_affine,process_mask_coords
 
-def plot_t_stats(T_obs,
-                 clusters,
-                 cluster_p_values,
-                 times,
-                 ii,
-                 conscious_state,
-                 frames,):
-    
-    # since the p values of each cluster is corrected for multiple comparison, 
-    # we could directly use 0.05 as the threshold to filter clusters
-    T_obs_plot              = 0 * np.ones_like(T_obs)
-    k = np.array([np.sum(c) for c in clusters])
-    if np.max(k) > 1000:
-        c_thresh = 1000
-    elif 1000 > np.max(k) > 500:
-        c_thresh = 500
-    elif 500 > np.max(k) > 100:
-        c_thresh = 100
-    elif 100 > np.max(k) > 10:
-        c_thresh = 10
-    else:
-        c_thresh = 0
-    for c, p_val in zip(clusters, cluster_p_values):
-        if (p_val <= 0.01) and (np.sum(c) >= c_thresh):# and (distance.cdist(np.where(c ==  True)[0].reshape(1,-1),np.where(c ==  True)[1].reshape(1,-1))[0][0] < 200):# and (np.sum(c) >= c_thresh):
-            T_obs_plot[c]   = T_obs[c]
-    # defind the range of the colorbar
-    vmax = np.max(np.abs(T_obs))
-    vmin = -vmax# - 2 * t_threshold
-    plt.close('all')
-    fig,ax = plt.subplots(figsize=(10,10))
-    im      = ax.imshow(T_obs_plot,
-                   origin                   = 'lower',
-                   cmap                     = plt.cm.RdBu_r,# to emphasize the clusters
-                   extent                   = times[[0, -1, 0, -1]],
-                   vmin                     = vmin,
-                   vmax                     = vmax,
-                   interpolation            = 'lanczos',
-                   )
-    divider = make_axes_locatable(ax)
-    cax     = divider.append_axes("right", 
-                                  size      = "5%", 
-                                  pad       = 0.2)
-    cb      = plt.colorbar(im, 
-                           cax              = cax,
-                           ticks            = np.linspace(vmin,vmax,3))
-    cb.ax.set(title = 'T Statistics')
-    ax.plot([times[0],times[-1]],[times[0],times[-1]],
-            linestyle                    = '--',
-            color                        = 'black',
-            alpha                        = 0.7,
-            )
-    ax.axhline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               label                        = 'Probe onset',)
-    ax.axvline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               )
-    if ii is not None:
-        ax.axhspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   label                        = 'probe offset ave +/- std',)
-        ax.axvspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   )
-    ax.set(xlabel                           = 'Test time',
-           ylabel                           = 'Train time',
-           title                            = f'nonparametric t test of {conscious_state}')
-    ax.legend()
-    return fig,ax
-def plot_p_values(times,
-                  clusters,
-                  cluster_p_values,
-                  ii,
-                  conscious_state,
-                  frames):
-    width = len(times)
-    p_clust = np.ones((width, width))# * np.nan
-    k = np.array([np.sum(c) for c in clusters])
-    if np.max(k) > 1000:
-        c_thresh = 1000
-    elif 1000 > np.max(k) > 500:
-        c_thresh = 500
-    elif 500 > np.max(k) > 100:
-        c_thresh = 100
-    elif 100 > np.max(k) > 10:
-        c_thresh = 10
-    else:
-        c_thresh = 0
-    for c, p_val in zip(clusters, cluster_p_values):
-        if (np.sum(c) >= c_thresh):
-            p_val_ = p_val.copy()
-            if p_val_ > 0.05:
-                p_val_ = 1.
-            p_clust[c] = p_val_
-    
-    # defind the range of the colorbar
-    vmax = 1.
-    vmin = 0.
-    plt.close('all')
-    fig,ax = plt.subplots(figsize = (10,10))
-    im      = ax.imshow(p_clust,
-                   origin                   = 'lower',
-                   cmap                     = plt.cm.RdBu_r,# to emphasize the clusters
-                   extent                   = times[[0, -1, 0, -1]],
-                   vmin                     = vmin,
-                   vmax                     = vmax,
-                   interpolation            = 'hanning',
-                   )
-    divider = make_axes_locatable(ax)
-    cax     = divider.append_axes("right", 
-                                  size      = "5%", 
-                                  pad       = 0.2)
-    cb      = plt.colorbar(im, 
-                           cax              = cax,
-                           ticks            = [0,0.05,1])
-    cb.ax.set(title = 'P values')
-    ax.plot([times[0],times[-1]],[times[0],times[-1]],
-            linestyle                       = '--',
-            color                           = 'black',
-            alpha                           = 0.7,
-            )
-    ax.axhline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               label                        = 'Probe onset',)
-    ax.axvline(0.,
-               linestyle                    = '--',
-               color                        = 'black',
-               alpha                        = 0.7,
-               )
-    if ii is not None:
-        ax.axhspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   label                        = 'probe offset ave +/- std',)
-        ax.axvspan(frames[ii][1] * (1 / 100) - frames[ii][2] * (1 / 100),
-                   frames[ii][1] * (1 / 100) + frames[ii][2] * (1 / 100),
-                   color                        = 'black',
-                   alpha                        = 0.2,
-                   )
-    ax.set(xlabel                           = 'Test time',
-           ylabel                           = 'Train time',
-           title                            = f'p value map of {conscious_state}')
-    ax.legend()
-    return fig,ax
-def plot_EEG_autoreject_log(autoreject_object,):
-    ar = autoreject_object
-    loss = ar.loss_['eeg'].mean(axis=-1)  # losses are stored by channel type.
-    fig,ax = plt.subplots(figsize=(10,6))
-    im = ax.matshow(loss.T * 1e6, cmap=plt.get_cmap('viridis'))
-    ax.set(xticks = range(len(ar.consensus)), 
-           xticklabels = ar.consensus.round(2),
-           yticks = range(len(ar.n_interpolate)), 
-           yticklabels = ar.n_interpolate)
-    
-    # Draw rectangle at location of best parameters
-    idx, jdx = np.unravel_index(loss.argmin(), loss.shape)
-    rect = patches.Rectangle((idx - 0.5, jdx - 0.5), 1, 1, linewidth=2,
-                             edgecolor='r', facecolor='none')
-    ax.add_patch(rect)
-    ax.xaxis.set_ticks_position('bottom')
-    ax.set(xlabel = r'Consensus percentage $\kappa$',
-           ylabel = r'Max sensors interpolated $\rho$',
-           title = 'Mean cross validation error (x 1e6)')
-    plt.colorbar(im)
-    return fig
+
 def str2int(x):
     if type(x) is str:
         return float(re.findall(r'\d+',x)[0])
@@ -907,132 +171,6 @@ def simple_load(f,idx):
     df['run'] = run
     df['session'] = session
     return df
-def get_frames(directory,new = True,EEG = True):
-    if EEG:
-        files = glob(os.path.join(directory,'*trials.csv'))
-#    elif EEG == 'fMRI':
-#        files = glob(os.path.join(directory,'*trials.csv'))
-    else:
-        files = glob(os.path.join(directory,'*','*.csv'))
-    df_stat = dict(
-        conscious_state = [],
-        prob_press_1 = [],
-        prob_press_2 = [],
-        correct = [],
-        frame_mean = [],
-        frame_std = [],
-        RT_mean = [],
-        RT_std = [],
-        )
-    empty_temp = ''
-    for ii,f in enumerate(files):
-        df = pd.read_csv(f).dropna()
-        for vis,df_sub in df.groupby(['visible.keys_raw']):
-            try:
-                print(f'session {ii+1}, vis = {vis}, n_trials = {df_sub.shape[0]}')
-                empty_temp += f'session {ii+1}, vis = {vis}, n_trials = {df_sub.shape[0]}'
-                empty_temp += '\n'
-            except:
-                print('session {}, vis = {}, n_trials = {}'.format(ii+1,
-                      vis,df_sub.shape[0]))
-                
-    df = pd.concat([simple_load(f,ii).dropna() for ii,f in enumerate(files)])
-    try:
-        for col in ['probeFrames_raw',
-                    'response.keys_raw',
-                    'visible.keys_raw']:
-#            print(df[col])
-            df[col] = df[col].apply(str2int)
-            
-    except:
-        for col in ['probe_Frames_raw',
-                    'response.keys_raw',
-                    'visible.keys_raw']:
-#            print(df[col])
-            df[col] = df[col].apply(str2int)
-            
-        df["probeFrames_raw"] = df["probe_Frames_raw"]
-    df = df[df['probeFrames_raw'] != 999]
-    df = df.sort_values(['run','order'])
-    
-    for vis,df_sub in df.groupby(['visible.keys_raw']):
-        df_press1 = df_sub[df_sub['response.keys_raw'] == 1]
-        df_press2 = df_sub[df_sub['response.keys_raw'] == 2]
-        prob1 = df_press1.shape[0] / df_sub.shape[0]
-        prob2 = df_press2.shape[0] / df_sub.shape[0]
-        
-        df_stat['conscious_state'].append(vis)
-        df_stat['prob_press_1'].append(prob1)
-        df_stat['prob_press_2'].append(prob2)
-        
-        try:
-            print(f"\nvis = {vis},mean frames = {np.median(df_sub['probeFrames_raw']):.5f}")
-            print(f"vis = {vis},prob(press 1) = {prob1:.4f}, p(press 2) = {prob2:.4f}")
-            empty_temp += f"\nvis = {vis},mean frames = {np.median(df_sub['probeFrames_raw']):.5f}\n"
-            empty_temp += f"vis = {vis},prob(press 1) = {prob1:.4f}, p(press 2) = {prob2:.4f}\n"
-        except:
-            print("\nvis = {},mean frames = {:.5f}".format(
-                    vis,np.median(df_sub['probeFrames_raw'])))
-            print(f"vis = {vis},prob(press 1) = {prob1:.4f}, p(press 2) = {prob2:.4f}")
-    if new:
-        df = []
-        for kk,f in enumerate(files):
-            temp = simple_load(f,kk).dropna()
-            try:
-                temp[['probeFrames_raw','visible.keys_raw']]
-            except:
-                temp['probeFrames_raw'] = temp['probe_Frames_raw']
-            probeFrame = []
-            for ii,row in temp.iterrows():
-                if int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 1:
-                    probeFrame.append(row['probeFrames_raw'])
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 2:
-                    probeFrame.append(row['probeFrames_raw'])
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 3:
-                    probeFrame.append(row['probeFrames_raw'])
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 4:
-                    probeFrame.append(row['probeFrames_raw'])
-            temp['probeFrames'] = probeFrame
-            df.append(temp)
-        df = pd.concat(df)
-    else:
-        df = []
-        for f in files:
-            temp = pd.read_csv(f).dropna()
-            temp[['probeFrames_raw','visible.keys_raw']]
-            probeFrame = []
-            for ii,row in temp.iterrows():
-                if int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 1:
-                    probeFrame.append(row['probeFrames_raw'] - 2)
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 2:
-                    probeFrame.append(row['probeFrames_raw'] - 1)
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 3:
-                    probeFrame.append(row['probeFrames_raw'] + 1)
-                elif int(re.findall(r'\d',row['visible.keys_raw'])[0]) == 4:
-                    probeFrame.append(row['probeFrames_raw'] + 2)
-            temp['probeFrames'] = probeFrame
-            df.append(temp)
-        df = pd.concat(df)
-    df['probeFrames'] = df['probeFrames'].apply(str2int)
-    df = df[df['probeFrames'] != 999]
-    results = []
-    for vis,df_sub in df.groupby(['visible.keys_raw']):
-        corrects = df_sub['response.corr_raw'].sum() / df_sub.shape[0]
-        try:
-            print(f"vis = {vis},N = {df_sub.shape[0]},mean frames = {np.mean(df_sub['probeFrames']):.2f} +/- {np.std(df_sub['probeFrames']):.2f}\np(correct) = {corrects:.4f}")
-            empty_temp += f"vis = {vis},N = {df_sub.shape[0]},mean frames = {np.mean(df_sub['probeFrames']):.2f} +/- {np.std(df_sub['probeFrames']):.2f}\np(correct) = {corrects:.4f}\n"
-            empty_temp += f"RT = {np.mean(df_sub['visible.rt_raw']):.3f} +/- {np.std(df_sub['visible.rt_raw']):.3f}\n"
-        except:
-            print("vis = {},mean frames = {:.2f} +/- {:.2f}".format(
-                    vis,np.mean(df_sub['probeFrames']),np.std(df_sub['probeFrames'])))
-        results.append([vis,np.mean(df_sub['probeFrames']),np.std(df_sub['probeFrames'])])
-        
-        df_stat['frame_mean'].append(np.mean(df_sub['probeFrames']))
-        df_stat['frame_std'].append(np.std(df_sub['probeFrames']))
-        df_stat['correct'].append(corrects)
-        df_stat['RT_mean'].append(np.mean(df_sub['visible.rt_raw']))
-        df_stat['RT_std'].append(np.std(df_sub['visible.rt_raw']))
-    return results,empty_temp,pd.DataFrame(df_stat),df
 
 def subj_map():
     temp = {'sub-01':'sub-01',
@@ -1143,17 +281,55 @@ def cartesian_product(fwhms, in_files, usans, btthresh):
 
 def getusans(x):
     return [[tuple([val[0], 0.5 * val[1]])] for val in x]
+def pickrun(files, whichrun):
+    """pick file from list of files"""
 
+    filemap = {'first': 0, 'last': -1, 'middle': len(files) // 2}
+
+    if isinstance(files, list):
+
+        # whichrun is given as integer
+        if isinstance(whichrun, int):
+            return files[whichrun]
+        # whichrun is given as string
+        elif isinstance(whichrun, str):
+            if whichrun not in filemap.keys():
+                raise (KeyError, 'Sorry, whichrun must be either integer index'
+                       'or string in form of "first", "last" or "middle')
+            else:
+                return files[filemap[whichrun]]
+    else:
+        # in case single file name is given
+        return files
+def pickvol(filenames, fileidx, which):
+    from nibabel import load
+    import numpy as np
+    if which.lower() == 'first':
+        idx = 0
+    elif which.lower() == 'middle':
+        idx = int(
+            np.ceil(load(filenames[fileidx]).shape[3] / 2))
+    elif which.lower() == 'last':
+        idx = load(filenames[fileidx]).shape[3] - 1
+    else:
+        raise Exception('unknown value for volume selection : %s' % which)
+    return idx
+def getthreshop(thresh):
+    return ['-thr %.10f -Tmin -bin' % (0.1 * val[1]) for val in thresh]
+def getmeanscale(medianvals):
+    return ['-mul %.10f' % (10000. / val) for val in medianvals]
 def create_fsl_FEAT_workflow_func(whichrun          = 0,
                                   whichvol          = 'middle',
                                   workflow_name     = 'nipype_mimic_FEAT',
                                   first_run         = True,
                                   func_data_file    = 'temp',
-                                  fwhm              = 3):
+                                  fwhm              = 3,
+                                  n_vol_remove      = 8,
+                                  total_vol         = 495,
+                                  ):
     """
     Works with fsl-5.0.9 and fsl-5.0.11, but not fsl-6.0.0
     """
-    from nipype.workflows.fmri.fsl             import preprocess
     from nipype.interfaces                     import fsl
     from nipype.interfaces                     import utility as util
     from nipype.pipeline                       import engine as pe
@@ -1161,11 +337,6 @@ def create_fsl_FEAT_workflow_func(whichrun          = 0,
     Setup some functions and hyperparameters
     """
     fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
-    pickrun             = preprocess.pickrun
-    pickvol             = preprocess.pickvol
-    getthreshop         = preprocess.getthreshop
-    getmeanscale        = preprocess.getmeanscale
-#    chooseindex         = preprocess.chooseindex
     
     """
     Start constructing the workflow graph
@@ -1201,11 +372,11 @@ def create_fsl_FEAT_workflow_func(whichrun          = 0,
     preproc.connect(inputnode,'func',
                     img2float,'in_file')
     """
-    delete first 10 volumes
+    delete first 8 volumes
     """
     develVolume         = pe.MapNode(
-                        interface   = fsl.ExtractROI(t_min  = 10,
-                                                     t_size = 508),
+                        interface   = fsl.ExtractROI(t_min  = n_vol_remove,
+                                                     t_size = total_vol),
                         iterfield   = ['in_file'],
                         name        = 'remove_volumes')
     preproc.connect(img2float,      'out_file',
@@ -2194,13 +1365,13 @@ def create_simple_highres2standard(roi,
     # setup inputspecs 
     simple_workflow.inputs.inputspec.flt_in_file    = roi
     simple_workflow.inputs.inputspec.flt_in_matrix  = os.path.abspath(os.path.join(preprocessed_functional_dir,
-#                                                        'reg',
+                                                        'reg',
                                                         'highres2standard.mat'))
-    simple_workflow.inputs.inputspec.flt_reference  = os.path.abspath(os.path.join(preprocessed_functional_dir,
-#                                                        'reg',
+    simple_workflow.inputs.inputspec.flt_reference  = os.path.abspath(os.path.join('/'.join(preprocessed_functional_dir.split('/')[:3]),
+                                                        'standard_brain',
                                                         'MNI152_T1_2mm_brain.nii.gz'))
-    simple_workflow.inputs.inputspec.mask           = os.path.abspath(os.path.join(preprocessed_functional_dir,
-#                                                        'reg',
+    simple_workflow.inputs.inputspec.mask           = os.path.abspath(os.path.join('/'.join(preprocessed_functional_dir.split('/')[:3]),
+                                                        'standard_brain',
                                                         'MNI152_T1_2mm_brain_mask_dil.nii.gz'))
     simple_workflow.inputs.bound_by_mask.out_file   = os.path.abspath(os.path.join(output_dir,
                                                          roi_name.replace('_fsl.nii.gz',
@@ -2358,13 +1529,10 @@ def registration_plotting(output_dir,
 def create_highpass_filter_workflow(workflow_name   = 'highpassfiler',
                                     HP_freq         = 60,
                                     TR              = 0.85):
-    from nipype.workflows.fmri.fsl    import preprocess
     from nipype.interfaces            import fsl
     from nipype.pipeline              import engine as pe
     from nipype.interfaces            import utility as util
     fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
-    getthreshop         = preprocess.getthreshop
-    getmeanscale        = preprocess.getmeanscale
     highpass_workflow = pe.Workflow(name = workflow_name)
     
     inputnode               = pe.Node(interface = util.IdentityInterface(
@@ -2464,7 +1632,6 @@ def convert_individual_space_to_standard_space(brain_map_individual_space,
                                                brain_map_standard_space,
                                                run_algorithm = False,
                                                ):
-    from nipype.interfaces            import fsl
     """
     FSL FLIRT alogirthm called by nipype
     
@@ -2481,7 +1648,7 @@ def convert_individual_space_to_standard_space(brain_map_individual_space,
     run_algorithm: bool, default = False
     """
     
-    
+    from nipype.interfaces import fsl
     flt = fsl.FLIRT()
     flt.inputs.in_file          = os.path.abspath(brain_map_individual_space)
     flt.inputs.reference        = os.path.abspath(standard_brain)
@@ -2500,14 +1667,15 @@ def nipype_fsl_randomise(input_file,
                          mask_file,
                          base_name,
                          tfce                   = True,
-                         var_smooth             = 6,
+                         var_smooth             = None,
                          demean                 = False,
                          one_sample_group_mean  = True,
                          n_permutation          = int(1e4),
                          quiet                  = False,
                          run_algorithm          = False,
+                         design_mat             = None,
+                         tcon                   = None,
                          ):
-    from nipype.interfaces            import fsl
     """
     Run FSL-randomise for a one-tailed one-sample t test, correct
         by TFCE
@@ -2532,19 +1700,31 @@ def nipype_fsl_randomise(input_file,
         set to True to surpress the outputs
     run_algorithm: bool, default = False
         run the algorithm or print the command line code
+    design_mat: str or os.path.abspath
+        design matrix (n_samples * 2, n_samples + 1)
+    tcon: str or os.path.abspath
+        design contrast matrix (n_samples + 1)
     """
+    from nipype.interfaces import fsl
     rand                        = fsl.Randomise()
     if quiet:
         rand.inputs.args        = '--quiet'
     rand.inputs.in_file         = os.path.abspath(input_file)
     rand.inputs.mask            = os.path.abspath(mask_file)
     rand.inputs.tfce            = tfce
-    rand.inputs.var_smooth      = var_smooth
+    if var_smooth is not None:
+        rand.inputs.var_smooth  = var_smooth
     rand.inputs.base_name       = os.path.abspath(base_name)
-    rand.inputs.demean          = demean
+    if demean is not None:
+        rand.inputs.demean      = demean
     rand.inputs.one_sample_group_mean = one_sample_group_mean
     rand.inputs.num_perm        = n_permutation
     rand.inputs.seed            = 12345
+    if design_mat is not None:
+        rand.design_mat = design_mat
+    if tcon is not None:
+        rand.tcon = tcon
+    
     
     if run_algorithm:
         rand.run()
@@ -2566,17 +1746,93 @@ def load_csv(f,print_ = False,sub = None):
         df['sub'] = sub
     return df
 
-def build_model_dictionary(model_name,
-                           print_train      = False,
-                           class_weight     = 'balanced',
-                           remove_invariant = True,
-                           scaler           = None,
-                           l1               = False,
-                           n_jobs           = 1,
-                           C                = 1,
-                           tol              = 1e-2,
+def build_model_dictionary(model_name:str,
+                           print_train:bool         = False,
+                           class_weight:str         = 'balanced',
+                           remove_invariant:bool    = True,
+                           scaler                   = None,
+                           l1:bool                  = False,
+                           n_jobs                   = 1,
+                           C:float                  = 1,
+                           tol:float                = 1e-3,
                            ):
+    """
+    
+
+    Parameters
+    ----------
+    model_name : str
+        DESCRIPTION.
+    print_train : bool, optional
+        DESCRIPTION. The default is False.
+    class_weight : str, optional
+        DESCRIPTION. The default is 'balanced'.
+    remove_invariant : bool, optional
+        DESCRIPTION. The default is True.
+    scaler : TYPE, optional
+        Defult scaler is always Standard Scaler if it is set to None. The default is None.
+    l1 : bool, optional
+        DESCRIPTION. The default is False.
+    n_jobs : TYPE, optional
+        DESCRIPTION. The default is 1.
+    C : float, optional
+        DESCRIPTION. The default is 1.
+    tol : float, optional
+        DESCRIPTION. The default is 1e-2.
+
+    Returns
+    -------
+    sklearn.pipeline
+        DESCRIPTION.
+
+    """
+    
     np.random.seed(12345)
+    # xgb = XGBClassifier(
+    #                     learning_rate                           = 1e-3, # not default
+    #                     max_depth                               = 10, # not default
+    #                     n_estimators                            = 100, # not default
+    #                     objective                               = 'binary:logistic', # default
+    #                     booster                                 = 'gbtree', # default
+    #                     subsample                               = 0.9, # not default
+    #                     colsample_bytree                        = 0.9, # not default
+    #                     reg_alpha                               = 0, # default
+    #                     reg_lambda                              = 1, # default
+    #                     random_state                            = 12345, # not default
+    #                     importance_type                         = 'gain', # default
+    #                     n_jobs                                  = n_jobs,# default to be 1
+    #                                           )
+    xgb = RandomForestClassifier(random_state = 12345)
+    RF = SelectFromModel(xgb,
+                        prefit                                  = False,
+                        threshold                               = 'median' # induce sparsity
+                        )
+    uni = SelectPercentile(score_func                           = mutual_info_classif,
+                           percentile                           = 50,
+                           ) # so annoying that I cannot control the random state
+    
+    pipeline = []
+    
+    if remove_invariant:
+        pipeline.append(VarianceThreshold())
+    
+    if scaler == None:
+        scaler = StandardScaler()
+    pipeline.append(scaler)
+    
+    feature_extractor, decoder = model_name.split(' + ')
+    
+    if feature_extractor == 'PCA':
+        pipeline.append(PCA(n_components = .90,
+                            random_state = 12345))
+        # l1 = False
+    elif feature_extractor == 'Mutual':
+        pipeline.append(uni)
+        # l1 = False
+    elif feature_extractor == 'RandomForest':
+        pipeline.append(RF)
+        # l1 = False
+    
     if l1:
         svm = LinearSVC(penalty                                 = 'l1', # not default
                         dual                                    = False, # not default
@@ -2598,20 +1854,7 @@ def build_model_dictionary(model_name,
     svm = CalibratedClassifierCV(base_estimator                 = svm,
                                  method                         = 'sigmoid',
                                  cv                             = 8)
-    xgb = XGBClassifier(
-                        learning_rate                           = 1e-3, # not default
-                        max_depth                               = 10, # not default
-                        n_estimators                            = 100, # not default
-                        objective                               = 'binary:logistic', # default
-                        booster                                 = 'gbtree', # default
-                        subsample                               = 0.9, # not default
-                        colsample_bytree                        = 0.9, # not default
-                        reg_alpha                               = 0, # default
-                        reg_lambda                              = 1, # default
-                        random_state                            = 12345, # not default
-                        importance_type                         = 'gain', # default
-                        n_jobs                                  = n_jobs,# default to be 1
-                                              )
+    
     bagging = BaggingClassifier(base_estimator                  = svm,
                                  n_estimators                   = 30, # not default
                                  max_features                   = 0.9, # not default
@@ -2620,34 +1863,11 @@ def build_model_dictionary(model_name,
                                  bootstrap_features             = True, # default
                                  random_state                   = 12345, # not default
                                                  )
-    RF = SelectFromModel(xgb,
-                        prefit                                  = False,
-                        threshold                               = 'median' # induce sparsity
-                        )
-    uni = SelectPercentile(score_func                           = mutual_info_classif,
-                           percentile                           = 50,
-                           ) # so annoying that I cannot control the random state
     knn = KNeighborsClassifier()
     tree = DecisionTreeClassifier(random_state                  = 12345,
                                   class_weight                  = class_weight)
     dummy = DummyClassifier(strategy = 'uniform',random_state   = 12345,)
     
-    pipeline = []
-    
-    if remove_invariant:
-        pipeline.append(VarianceThreshold())
-    
-    if scaler is not None:
-        pipeline.append(scaler)
-    
-    feature_extractor, decoder = model_name.split(' + ')
-    
-    if feature_extractor == 'PCA':
-        pipeline.append(PCA())
-    elif feature_extractor == 'Mutual':
-        pipeline.append(uni)
-    elif feature_extractor == 'RandomForest':
-        pipeline.append(RF)
     
     if decoder == 'Linear-SVM':
         pipeline.append(svm)
@@ -3462,68 +2682,7 @@ def load_same_same(sub,target_folder = 'decoding',target_file = '*None*csv'):
     df['side'] = temp[:,0]
     return df
 
-def plot_stat_map(stat_map_img, 
-                  bg_img                    = '', 
-                  cut_coords                = None,
-                  output_file               = None, 
-                  display_mode              = 'ortho', 
-                  colorbar                  = True,
-                  figure                    = None, 
-                  axes                      = None, 
-                  title                     = None, 
-                  threshold                 = 1e-6,
-                  annotate                  = True, 
-                  draw_cross                = True, 
-                  black_bg                  = 'auto',
-                  cmap                      = cm.coolwarm, 
-                  symmetric_cbar            = "auto",
-                  dim                       = 'auto', 
-                  vmin_                     = None,
-                  vmax                      = None, 
-                  resampling_interpolation  = 'continuous',
-                  **kwargs):
-    
-    bg_img, black_bg, bg_vmin, bg_vmax      = _load_anat(
-                  bg_img, 
-                  dim                       = dim,
-                  black_bg                  = black_bg)
 
-    stat_map_img                            = _utils.check_niimg_3d(
-                  stat_map_img, 
-                  dtype                     = 'auto')
-
-    cbar_vmin, cbar_vmax, vmin, vmax        = _get_colorbar_and_data_ranges(
-                  _safe_get_data(
-                          stat_map_img, 
-                          ensure_finite     = True),
-                          vmax,
-                          symmetric_cbar,
-                          kwargs)
-    display                                 = _plot_img_with_bg(
-                  img                       = stat_map_img, 
-                  bg_img                    = bg_img, 
-                  cut_coords                = cut_coords,
-                  output_file               = output_file, 
-                  display_mode              = display_mode,
-                  figure                    = figure, 
-                  axes                      = axes, 
-                  title                     = title, 
-                  annotate                  = annotate,
-                  draw_cross                = draw_cross, 
-                  black_bg                  = black_bg, 
-                  threshold                 = threshold,
-                  bg_vmin                   = bg_vmin, 
-                  bg_vmax                   = bg_vmax, 
-                  cmap                      = cmap, 
-                  vmin                      = vmin_, 
-                  vmax                      = vmax,
-                  colorbar                  = colorbar, 
-                  cbar_vmin                 = vmin_, 
-                  cbar_vmax                 = cbar_vmax,
-                  resampling_interpolation  = resampling_interpolation, 
-                  **kwargs)
-
-    return display
 
 def load_whole_brain_data_with_mask(BOLD_file,csv_file,masker):
     masker.fit()
